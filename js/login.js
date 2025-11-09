@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const passwordInput = document.getElementById('password');
     const rememberCheckbox = document.getElementById('remember');
 
+    // 与后端配置保持一致的 token Header 名称（application.yaml -> sky.jwt.user-token-name）
+    const TOKEN_HEADER_NAME = 'authentication';
+
     // 页面加载时检查是否有保存的用户名
     const savedUsername = localStorage.getItem('savedUsername');
     if (savedUsername) {
@@ -12,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 表单提交事件
-    loginForm.addEventListener('submit', function (e) {
+    loginForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const username = usernameInput.value.trim();
@@ -44,28 +47,50 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.removeItem('savedUsername');
         }
 
-        // 模拟登录过程
+        // 登录过程
         showMessage('正在登录...', 'info');
         const loginButton = loginForm.querySelector('.btn-login');
         loginButton.disabled = true;
         loginButton.textContent = '登录中...';
 
-        // 模拟网络延迟
-        setTimeout(() => {
-            // 这里应该是实际的登录验证逻辑
-            // 示例：简单的用户名密码验证
-            if (username === 'admin' && password === '123456') {
+        try {
+            const res = await fetch('http://localhost:8080/api/user/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+
+            if (data && data.code === 1 && data.data) {
+                const vo = data.data; // LoginVO
+                // 存储 token，后续请求使用此 Header 携带
+                localStorage.setItem(TOKEN_HEADER_NAME, vo.token);
+                // 可选：存储基本用户信息
+                localStorage.setItem('currentUser', JSON.stringify({
+                    userId: vo.userId,
+                    username: vo.username,
+                    realName: vo.realName,
+                    userType: vo.userType
+                }));
+
                 showMessage('登录成功！', 'success');
                 setTimeout(() => {
-                    // 跳转到主页面（需要创建）
-                    window.location.href = 'index.html';
-                }, 1000);
+                    window.location.href = './index.html';
+                }, 800);
             } else {
-                showMessage('用户名或密码错误', 'error');
+                const msg = (data && data.msg) ? data.msg : '用户名或密码错误';
+                showMessage(msg, 'error');
                 loginButton.disabled = false;
                 loginButton.textContent = '登录';
             }
-        }, 1500);
+        } catch (err) {
+            showMessage('网络异常，请稍后重试', 'error');
+            loginButton.disabled = false;
+            loginButton.textContent = '登录';
+        }
     });
 
     // 输入框焦点效果
@@ -153,7 +178,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     `;
     document.head.appendChild(style);
-})
-
+});
 
 
