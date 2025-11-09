@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生信息管理系统 - 登录</title>
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="login-box">
+            <div class="logo">
+                <div class="icon">📚</div>
+                <h1>学生信息管理系统</h1>
+                <p class="subtitle">Student Information Management System</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">
+                        <span class="icon">👤</span>
+                        用户名
+                    </label>
+                    <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">
+                        <span class="icon">🔒</span>
+                        密码
+                    </label>
+                    <input type="password" id="password" name="password" placeholder="请输入密码" required>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember">
+                        <input type="checkbox" id="remember">
+                        <span>记住我</span>
+                    </label>
+                    <a href="#" class="forgot-password">忘记密码?</a>
+                </div>
+
+                <button type="submit" class="btn-login">登录</button>
+
+                <div class="register-link">
+                    还没有账号? <a href="#">立即注册</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 学生信息管理系统. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="../js/login.js"></script>
+</body>
+
+</html>

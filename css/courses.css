@@ -1,0 +1,255 @@
+.page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 30px;
+    color: white;
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header::before {
+    content: '📚';
+    position: absolute;
+    font-size: 250px;
+    opacity: 0.08;
+    right: -50px;
+    top: -80px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.page-header>div,
+.page-header>button {
+    position: relative;
+    z-index: 1;
+}
+
+.page-header h2 {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
+
+.page-header .subtitle {
+    font-size: 16px;
+    opacity: 0.95;
+}
+
+.page-header .btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.page-header .btn-primary:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 筛选区样式 */
+.filter-section {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+}
+
+/* 课程网格布局 */
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.course-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.course-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.course-header {
+    padding: 25px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    border-bottom: 3px solid #667eea;
+}
+
+.course-code {
+    display: inline-block;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    font-family: 'Courier New', monospace;
+}
+
+.course-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.course-body {
+    padding: 25px;
+}
+
+.course-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.info-box {
+    background: var(--bg-color);
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.info-box-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-box-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.course-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.meta-badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.meta-badge.required {
+    background: linear-gradient(135deg, #eb3349, #f45c43);
+    color: white;
+}
+
+.meta-badge.elective {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+}
+
+.meta-badge.practice {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    color: white;
+}
+
+.course-footer {
+    padding: 20px 25px;
+    background: var(--bg-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 课程类型图标 */
+.type-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.type-icon.required {
+    background: linear-gradient(135deg, rgba(235, 51, 73, 0.1), rgba(244, 92, 67, 0.1));
+}
+
+.type-icon.elective {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+}
+
+.type-icon.practice {
+    background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+}
+
+/* 表格样式(备用) */
+.table-view {
+    display: none;
+}
+
+/* 表格容器保持显示 */
+.table-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    padding: 25px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+
+/* 课程代码样式 */
+code {
+    padding: 4px 10px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* 课程类型徽章 */
+.course-type {
+    padding: 6px 14px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.type-required {
+    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    color: white;
+}
+
+.type-elective {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.type-practice {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+}
+
+/* 学分徽章 */
+.credit-badge {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}

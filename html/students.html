@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>学生管理 - 学生信息管理系统</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/students.css">
+</head>
+
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-header">
+        <div class="header-left">
+            <div class="logo">📚</div>
+            <h1>学生信息管理系统</h1>
+        </div>
+        <div class="header-right">
+            <div class="search-box">
+                <input type="text" placeholder="搜索学生、课程...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23667eea'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='Arial'%3E管%3C/text%3E%3C/svg%3E"
+                        alt="用户头像">
+                    <span class="username">系统管理员</span>
+                    <span class="dropdown-icon">▼</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-item" data-page="dashboard" onclick="location.href='index.html'">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">数据概览</span>
+                </div>
+                <div class="nav-item active" data-page="students">
+                    <span class="nav-icon">👨‍🎓</span>
+                    <span class="nav-text">学生管理</span>
+                </div>
+                <div class="nav-item" data-page="status" onclick="location.href='status.html'">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">学籍管理</span>
+                </div>
+                <div class="nav-item" data-page="practice" onclick="location.href='practice.html'">
+                    <span class="nav-icon">🏆</span>
+                    <span class="nav-text">社会实践</span>
+                </div>
+                <div class="nav-item" data-page="reward" onclick="location.href='reward.html'">
+                    <span class="nav-icon">🎖️</span>
+                    <span class="nav-text">奖惩管理</span>
+                </div>
+                <div class="nav-item" data-page="scores" onclick="location.href='scores.html'">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-text">成绩管理</span>
+                </div>
+                <div class="nav-item" data-page="courses" onclick="location.href='courses.html'">
+                    <span class="nav-icon">📚</span>
+                    <span class="nav-text">课程管理</span>
+                </div>
+                <div class="nav-item" data-page="profile" onclick="location.href='profile.html'">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">个人信息</span>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span class="nav-text">退出登录</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <div class="page-header gradient-header">
+                <div>
+                    <h2>👨‍🎓 学生管理</h2>
+                    <p class="subtitle">全面管理学生基本信息与档案</p>
+                </div>
+                <button class="btn-primary" id="addStudentBtn">
+                    <span class="btn-icon">➕</span>
+                    添加学生
+                </button>
+            </div>
+
+            <!-- 搜索和筛选区域 -->
+            <div class="filter-section">
+                <div class="filter-group">
+                    <input type="text" id="searchInput" placeholder="搜索学号、姓名、身份证号..." class="search-input">
+                    <select id="gradeFilter" class="filter-select">
+                        <option value="">全部年级</option>
+                        <option value="1">大一</option>
+                        <option value="2">大二</option>
+                        <option value="3">大三</option>
+                        <option value="4">大四</option>
+                    </select>
+                    <select id="majorFilter" class="filter-select">
+                        <option value="">全部专业</option>
+                    </select>
+                    <select id="genderFilter" class="filter-select">
+                        <option value="">全部性别</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                    <button class="btn-secondary" id="resetFilterBtn">重置</button>
+                </div>
+            </div>
+
+            <!-- 学生列表 -->
+            <div class="table-container">
+                <table class="data-table" id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>编号</th>
+                            <th>学号</th>
+                            <th>姓名</th>
+                            <th>性别</th>
+                            <th>年级</th>
+                            <th>专业</th>
+                            <th>班级</th>
+                            <th>联系电话</th>
+                            <th>入学日期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <!-- 数据将通过JavaScript动态加载 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分页控制 -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="pageSizeSelect">每页显示：</label>
+                    <select id="pageSizeSelect" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="10">10条</option>
+                        <option value="20">20条</option>
+                        <option value="50">50条</option>
+                        <option value="100">100条</option>
+                    </select>
+                </div>
+                <div class="pagination" id="pagination">
+                    <!-- 分页按钮将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加/编辑学生模态框 -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加学生</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>学号 <span class="required">*</span></label>
+                            <input type="text" name="studentNo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>姓名 <span class="required">*</span></label>
+                            <input type="text" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>性别 <span class="required">*</span></label>
+                            <select name="gender" required>
+                                <option value="">请选择</option>
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>身份证号</label>
+                            <input type="text" name="idCard" maxlength="18">
+                        </div>
+                        <div class="form-group">
+                            <label>出生日期</label>
+                            <input type="date" name="birthDate">
+                        </div>
+                        <div class="form-group">
+                            <label>联系电话</label>
+                            <input type="tel" name="phone">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>邮箱</label>
+                            <input type="email" name="email">
+                        </div>
+                        <div class="form-group">
+                            <label>入学日期 <span class="required">*</span></label>
+                            <input type="date" name="admissionDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>年级 <span class="required">*</span></label>
+                            <select name="grade" required>
+                                <option value="">请选择</option>
+                                <option value="1">大一</option>
+                                <option value="2">大二</option>
+                                <option value="3">大三</option>
+                                <option value="4">大四</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>专业 <span class="required">*</span></label>
+                            <select name="major" required id="majorSelect">
+                                <option value="">请选择</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>班级</label>
+                            <select name="className" id="classSelect">
+                                <option value="">请选择</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>家庭住址</label>
+                            <input type="text" name="homeAddress">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>紧急联系人</label>
+                            <input type="text" name="emergencyContact">
+                        </div>
+                        <div class="form-group">
+                            <label>紧急联系电话</label>
+                            <input type="tel" name="emergencyPhone">
+                        </div>
+                    </div>
+                    <input type="hidden" name="isEdit" value="false">
+                    <input type="hidden" name="studentId" value="">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary modal-close">取消</button>
+                <button type="submit" form="studentForm" class="btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script src="../js/students.js"></script>
+</body>
+
+</html>

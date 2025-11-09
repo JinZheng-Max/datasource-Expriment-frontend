@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>学生信息管理系统 - 首页</title>
+    <link rel="stylesheet" href="../css/index.css">
+</head>
+
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-header">
+        <div class="header-left">
+            <div class="logo">📚</div>
+            <h1>学生信息管理系统</h1>
+        </div>
+        <div class="header-right">
+            <div class="search-box">
+                <input type="text" placeholder="搜索学生、课程...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="user-info">
+                <span class="notification">🔔<span class="badge">3</span></span>
+                <div class="user-avatar">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23667eea'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='Arial'%3E管%3C/text%3E%3C/svg%3E"
+                        alt="用户头像">
+                    <span class="username">系统管理员</span>
+                    <span class="dropdown-icon">▼</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">数据概览</span>
+                </div>
+                <div class="nav-item" data-page="students" onclick="location.href='students.html'">
+                    <span class="nav-icon">👨‍🎓</span>
+                    <span class="nav-text">学生管理</span>
+                </div>
+                <div class="nav-item" data-page="status" onclick="location.href='status.html'">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">学籍管理</span>
+                </div>
+                <div class="nav-item" data-page="practice" onclick="location.href='practice.html'">
+                    <span class="nav-icon">🏆</span>
+                    <span class="nav-text">社会实践</span>
+                </div>
+                <div class="nav-item" data-page="reward" onclick="location.href='reward.html'">
+                    <span class="nav-icon">🎖️</span>
+                    <span class="nav-text">奖惩管理</span>
+                </div>
+                <div class="nav-item" data-page="scores" onclick="location.href='scores.html'">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-text">成绩管理</span>
+                </div>
+                <div class="nav-item" data-page="courses" onclick="location.href='courses.html'">
+                    <span class="nav-icon">📚</span>
+                    <span class="nav-text">课程管理</span>
+                </div>
+                <div class="nav-item" data-page="profile" onclick="location.href='profile.html'">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">个人信息</span>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span class="nav-text">退出登录</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 数据统计卡片 -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-icon student-icon">👨‍🎓</div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="totalStudents">0</h3>
+                        <p class="stat-label">在校学生总数</p>
+                        <span class="stat-trend up">↑ 5.2%</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon course-icon">📚</div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="totalCourses">0</h3>
+                        <p class="stat-label">开设课程数</p>
+                        <span class="stat-trend up">↑ 3.1%</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon practice-icon">🏆</div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="totalPractices">0</h3>
+                        <p class="stat-label">社会实践活动</p>
+                        <span class="stat-trend up">↑ 12.5%</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon reward-icon">🎖️</div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="totalRewards">0</h3>
+                        <p class="stat-label">本学期奖励</p>
+                        <span class="stat-trend down">↓ 2.3%</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 图表和数据展示区 -->
+            <section class="charts-section">
+                <div class="chart-card large">
+                    <div class="card-header">
+                        <h3>学生年级分布</h3>
+                        <div class="card-actions">
+                            <button class="btn-icon">📊</button>
+                            <button class="btn-icon">⋯</button>
+                        </div>
+                    </div>
+                    <div class="chart-content" id="gradeChart">
+                        <div class="bar-chart">
+                            <div class="bar-item" style="--height: 85%">
+                                <div class="bar-fill"></div>
+                                <span class="bar-label">大一</span>
+                                <span class="bar-value">1250</span>
+                            </div>
+                            <div class="bar-item" style="--height: 75%">
+                                <div class="bar-fill"></div>
+                                <span class="bar-label">大二</span>
+                                <span class="bar-value">1180</span>
+                            </div>
+                            <div class="bar-item" style="--height: 65%">
+                                <div class="bar-fill"></div>
+                                <span class="bar-label">大三</span>
+                                <span class="bar-value">1050</span>
+                            </div>
+                            <div class="bar-item" style="--height: 55%">
+                                <div class="bar-fill"></div>
+                                <span class="bar-label">大四</span>
+                                <span class="bar-value">920</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>学籍状态统计</h3>
+                        <div class="card-actions">
+                            <button class="btn-icon">🔄</button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <div class="donut-chart">
+                            <svg viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="80" fill="none" stroke="#e0e0e0" stroke-width="20" />
+                                <circle cx="100" cy="100" r="80" fill="none" stroke="#667eea" stroke-width="20"
+                                    stroke-dasharray="452" stroke-dashoffset="90" transform="rotate(-90 100 100)" />
+                                <circle cx="100" cy="100" r="80" fill="none" stroke="#38ef7d" stroke-width="20"
+                                    stroke-dasharray="452" stroke-dashoffset="407" transform="rotate(-90 100 100)" />
+                            </svg>
+                            <div class="donut-center">
+                                <span class="donut-value">96.8%</span>
+                                <span class="donut-label">在读率</span>
+                            </div>
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #667eea"></span>
+                                <span>在读 4,320</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #38ef7d"></span>
+                                <span>休学 80</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #e0e0e0"></span>
+                                <span>其他 60</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 快速操作和通知区 -->
+            <section class="info-section">
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>快速操作</h3>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="action-btn">
+                            <span class="action-icon">➕</span>
+                            <span>添加学生</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="action-icon">📝</span>
+                            <span>录入成绩</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="action-icon">🎖️</span>
+                            <span>添加奖惩</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="action-icon">📊</span>
+                            <span>导出报表</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>最新动态</h3>
+                        <a href="#" class="view-more">查看全部 →</a>
+                    </div>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon">🎓</div>
+                            <div class="activity-content">
+                                <p class="activity-text">张三同学获得国家奖学金</p>
+                                <span class="activity-time">2小时前</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">📝</div>
+                            <div class="activity-content">
+                                <p class="activity-text">2024-2025学年第一学期成绩已录入</p>
+                                <span class="activity-time">5小时前</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">🏆</div>
+                            <div class="activity-content">
+                                <p class="activity-text">志愿服务活动报名截止提醒</p>
+                                <span class="activity-time">1天前</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">⚠️</div>
+                            <div class="activity-content">
+                                <p class="activity-text">15名学生成绩待审核</p>
+                                <span class="activity-time">2天前</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../js/index.js"></script>
+</body>
+
+</html>

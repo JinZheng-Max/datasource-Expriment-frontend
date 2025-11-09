@@ -1,0 +1,210 @@
+.page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 30px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.page-header h2 {
+    font-size: 32px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.page-header .subtitle {
+    font-size: 16px;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+/* 状态卡片网格布局 */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.status-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea;
+    position: relative;
+    overflow: hidden;
+}
+
+.status-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), transparent);
+    border-radius: 0 0 0 100%;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.15);
+}
+
+.status-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.student-info h3 {
+    font-size: 20px;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.student-no {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.status-badge-large {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.status-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.change-date {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* 时间线样式 */
+.timeline-view {
+    position: relative;
+    padding-left: 40px;
+}
+
+.timeline-view::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -32px;
+    top: 20px;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border: 3px solid #667eea;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+/* 筛选器样式 */
+.filter-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+}
+
+/* 表格容器 */
+.table-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    padding: 25px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+
+/* 状态徽章 */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-success {
+    background: rgba(56, 239, 125, 0.1);
+    color: var(--success-color);
+}
+
+.status-warning {
+    background: rgba(240, 147, 251, 0.1);
+    color: var(--warning-color);
+}
+
+.status-info {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+}

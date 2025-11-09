@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人信息 - 学生信息管理系统</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/students.css">
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+
+<body>
+    <header class="top-header">
+        <div class="header-left">
+            <div class="logo">📚</div>
+            <h1>学生信息管理系统</h1>
+        </div>
+        <div class="header-right">
+            <div class="search-box">
+                <input type="text" placeholder="搜索学生、课程...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23667eea'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='Arial'%3E管%3C/text%3E%3C/svg%3E"
+                        alt="用户头像">
+                    <span class="username">系统管理员</span>
+                    <span class="dropdown-icon">▼</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-item" data-page="dashboard" onclick="location.href='index.html'">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">数据概览</span>
+                </div>
+                <div class="nav-item" data-page="students" onclick="location.href='students.html'">
+                    <span class="nav-icon">👨‍🎓</span>
+                    <span class="nav-text">学生管理</span>
+                </div>
+                <div class="nav-item" data-page="status" onclick="location.href='status.html'">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">学籍管理</span>
+                </div>
+                <div class="nav-item" data-page="practice" onclick="location.href='practice.html'">
+                    <span class="nav-icon">🏆</span>
+                    <span class="nav-text">社会实践</span>
+                </div>
+                <div class="nav-item" data-page="reward" onclick="location.href='reward.html'">
+                    <span class="nav-icon">🎖️</span>
+                    <span class="nav-text">奖惩管理</span>
+                </div>
+                <div class="nav-item" data-page="scores" onclick="location.href='scores.html'">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-text">成绩管理</span>
+                </div>
+                <div class="nav-item" data-page="courses" onclick="location.href='courses.html'">
+                    <span class="nav-icon">📚</span>
+                    <span class="nav-text">课程管理</span>
+                </div>
+                <div class="nav-item active" data-page="profile">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">个人信息</span>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span class="nav-text">退出登录</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>👤 个人信息</h2>
+                    <p class="subtitle">查看和管理您的账户信息</p>
+                </div>
+            </div>
+
+            <div class="profile-container">
+                <!-- 左侧:用户信息卡片 -->
+                <div class="profile-sidebar">
+                    <div class="user-card">
+                        <div class="user-avatar-large">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23667eea'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='Arial'%3E管%3C/text%3E%3C/svg%3E"
+                                alt="用户头像" id="userAvatarImg">
+                        </div>
+                        <button class="btn-upload">
+                            <span>📷</span>
+                            更换头像
+                        </button>
+                        <h3 class="user-name" id="displayName">系统管理员</h3>
+                        <p class="user-role" id="displayRole">系统管理员</p>
+                        <div class="user-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">Admin</span>
+                                <span class="stat-label">用户名</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="loginCount">238</span>
+                                <span class="stat-label">登录次数</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>📅 账号信息</h4>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <span class="info-label">创建时间</span>
+                                <span class="info-value" id="createTime">2024-01-15</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">最后登录</span>
+                                <span class="info-value" id="lastLogin">2024-12-20 09:30</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">账号状态</span>
+                                <span class="info-value status-active">正常</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧:信息编辑区域 -->
+                <div class="profile-main">
+                    <!-- Tab导航 -->
+                    <div class="tab-navigation">
+                        <button class="tab-btn active" data-tab="info">
+                            <span>📝</span>
+                            基本信息
+                        </button>
+                        <button class="tab-btn" data-tab="security">
+                            <span>🔒</span>
+                            安全设置
+                        </button>
+                    </div>
+
+                    <!-- 基本信息Tab -->
+                    <div class="tab-content active" id="info-tab">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3>基本信息</h3>
+                                <button class="btn-edit" id="editInfoBtn">
+                                    <span>✏️</span>
+                                    编辑
+                                </button>
+                            </div>
+                            <form id="infoForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>真实姓名</label>
+                                        <input type="text" name="real_name" value="系统管理员" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>用户名</label>
+                                        <input type="text" name="username" value="admin" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>用户类型</label>
+                                        <input type="text" value="管理员" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>角色</label>
+                                        <input type="text" value="系统管理员" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group full-width">
+                                        <label>邮箱地址</label>
+                                        <input type="email" name="email" placeholder="请输入邮箱地址" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group full-width">
+                                        <label>联系电话</label>
+                                        <input type="tel" name="phone" placeholder="请输入联系电话" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-actions" style="display: none;" id="infoFormActions">
+                                    <button type="button" class="btn-secondary" id="cancelInfoBtn">取消</button>
+                                    <button type="submit" class="btn-primary">保存修改</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 安全设置Tab -->
+                    <div class="tab-content" id="security-tab">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3>🔐 修改密码</h3>
+                            </div>
+                            <form id="passwordForm">
+                                <div class="form-row">
+                                    <div class="form-group full-width">
+                                        <label>当前密码 <span class="required">*</span></label>
+                                        <input type="password" name="old_password" placeholder="请输入当前密码" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group full-width">
+                                        <label>新密码 <span class="required">*</span></label>
+                                        <input type="password" name="new_password" placeholder="请输入新密码(6-20位)" required
+                                            minlength="6" maxlength="20">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group full-width">
+                                        <label>确认新密码 <span class="required">*</span></label>
+                                        <input type="password" name="confirm_password" placeholder="请再次输入新密码" required>
+                                    </div>
+                                </div>
+                                <div class="password-tips">
+                                    <p class="tip-title">密码强度要求:</p>
+                                    <ul>
+                                        <li>✓ 长度6-20位</li>
+                                        <li>✓ 建议包含字母、数字和符号</li>
+                                        <li>✓ 不要使用过于简单的密码</li>
+                                    </ul>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">修改密码</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3>🔔 登录记录</h3>
+                            </div>
+                            <div class="login-history">
+                                <div class="history-item">
+                                    <div class="history-icon">💻</div>
+                                    <div class="history-info">
+                                        <p class="history-location">Windows 10 · Chrome 120.0</p>
+                                        <p class="history-time">2024-12-20 09:30:25</p>
+                                    </div>
+                                    <span class="history-status current">当前登录</span>
+                                </div>
+                                <div class="history-item">
+                                    <div class="history-icon">📱</div>
+                                    <div class="history-info">
+                                        <p class="history-location">Android · Chrome Mobile</p>
+                                        <p class="history-time">2024-12-19 18:45:12</p>
+                                    </div>
+                                    <span class="history-status">已退出</span>
+                                </div>
+                                <div class="history-item">
+                                    <div class="history-icon">💻</div>
+                                    <div class="history-info">
+                                        <p class="history-location">Windows 10 · Chrome 119.0</p>
+                                        <p class="history-time">2024-12-19 08:20:30</p>
+                                    </div>
+                                    <span class="history-status">已退出</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script src="../js/profile.js"></script>
+</body>
+
+</html>
