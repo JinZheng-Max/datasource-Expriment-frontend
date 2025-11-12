@@ -152,18 +152,35 @@ async function loadClassesByMajor(majorName) {
 // 加载学生数据
 async function loadStudents() {
     try {
-        const searchText = document.getElementById('searchInput').value;
-        
+        const searchText = document.getElementById('searchInput').value.trim();
+        const gradeValue = document.getElementById('gradeFilter').value;
+        const majorValue = document.getElementById('majorFilter').value;
+        const genderValue = document.getElementById('genderFilter').value;
+
+        const payload = {
+            page: currentPage,
+            pageSize: pageSize,
+            name: searchText || ''
+        };
+
+        if (gradeValue) {
+            payload.grade = parseInt(gradeValue, 10);
+        }
+
+        if (majorValue) {
+            payload.major = majorValue;
+        }
+
+        if (genderValue) {
+            payload.gender = genderValue;
+        }
+ 
         const res = await authFetch('http://localhost:8080/api/student/page', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                page: currentPage,
-                pageSize: pageSize,
-                name: searchText || ''
-            })
+            body: JSON.stringify(payload)
         });
         const json = await res.json();
         
@@ -210,6 +227,23 @@ function generateMockStudents(count) {
     return students;
 }
 
+function formatDateValue(value) {
+    if (!value) {
+        return '';
+    }
+    if (Array.isArray(value)) {
+        const [year, month, day] = value;
+        if (year && month && day) {
+            return [year, month.toString().padStart(2, '0'), day.toString().padStart(2, '0')].join('-');
+        }
+        return '';
+    }
+    if (typeof value === 'string') {
+        return value.split('T')[0];
+    }
+    return '';
+}
+
 // 渲染学生列表
 function renderStudents() {
     const tbody = document.getElementById('studentTableBody');
@@ -227,7 +261,7 @@ function renderStudents() {
                 <td>${student.major || ''}</td>
                 <td>${student.className || ''}</td>
                 <td>${student.phone || ''}</td>
-                <td>${student.admissionDate || ''}</td>
+                <td>${formatDateValue(student.admissionDate)}</td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-action btn-view" onclick="viewStudent(${student.studentId})">查看</button>
@@ -348,9 +382,18 @@ async function viewStudent(id) {
             // 填充表单数据（使用安全的方式，避免null错误）
             const setFieldValue = (name, value) => {
                 const field = form.querySelector(`[name="${name}"]`);
-                if (field) {
-                    field.value = value || '';
+                if (!field) {
+                    return;
                 }
+
+                let finalValue = value ?? '';
+                if (name === 'birthDate' || name === 'admissionDate') {
+                    finalValue = formatDateValue(value);
+                } else if (name === 'grade') {
+                    finalValue = value != null ? String(value) : '';
+                }
+
+                field.value = finalValue;
             };
             
             setFieldValue('studentId', student.studentId);
@@ -366,6 +409,21 @@ async function viewStudent(id) {
             setFieldValue('homeAddress', student.homeAddress);
             setFieldValue('emergencyContact', student.emergencyContact);
             setFieldValue('emergencyPhone', student.emergencyPhone);
+
+            // 设置专业与班级
+            const majorSelect = form.querySelector('[name="major"]');
+            const classSelect = form.querySelector('[name="className"]');
+            if (majorSelect) {
+                majorSelect.value = student.major || '';
+                if (student.major) {
+                    await loadClassesByMajor(student.major);
+                    if (classSelect) {
+                        classSelect.value = student.className || '';
+                    }
+                } else if (classSelect) {
+                    classSelect.innerHTML = '<option value="">请选择</option>';
+                }
+            }
             
             // 禁用所有表单输入（只读模式）
             const inputs = form.querySelectorAll('input, select');
@@ -426,28 +484,50 @@ async function editStudent(id) {
                 saveBtn.style.display = 'inline-block';
             }
             
+            const setFieldValue = (name, value) => {
+                const field = form.querySelector(`[name="${name}"]`);
+                if (!field) {
+                    return;
+                }
+ 
+                let finalValue = value ?? '';
+                if (name === 'birthDate' || name === 'admissionDate') {
+                    finalValue = formatDateValue(value);
+                } else if (name === 'grade') {
+                    finalValue = value != null ? String(value) : '';
+                }
+ 
+                field.value = finalValue;
+            };
+            
             // 填充表单数据（字段名与后端DTO一致）
-            form.querySelector('[name="studentNo"]').value = student.studentNo || '';
-            form.querySelector('[name="name"]').value = student.name || '';
-            form.querySelector('[name="gender"]').value = student.gender || '';
-            form.querySelector('[name="idCard"]').value = student.idCard || '';
-            
-            // 处理日期字段（后端返回的是 LocalDate，格式为 YYYY-MM-DD，可以直接使用）
-            form.querySelector('[name="birthDate"]').value = student.birthDate || '';
-            form.querySelector('[name="phone"]').value = student.phone || '';
-            form.querySelector('[name="email"]').value = student.email || '';
-            form.querySelector('[name="admissionDate"]').value = student.admissionDate || '';
-            form.querySelector('[name="grade"]').value = student.grade || '';
-            
-            // 修复住址字段：后端VO字段是 homeAddress，不是 address
-            form.querySelector('[name="homeAddress"]').value = student.homeAddress || '';
-            
-            form.querySelector('[name="emergencyContact"]').value = student.emergencyContact || '';
-            form.querySelector('[name="emergencyPhone"]').value = student.emergencyPhone || '';
-            
-            // TODO: 如果需要回显专业和班级，需要从后端获取专业名称和班级名称
-            // 暂时留空，因为后端返回的是 majorId 和 classId
-
+            setFieldValue('studentNo', student.studentNo);
+            setFieldValue('name', student.name);
+            setFieldValue('gender', student.gender);
+            setFieldValue('idCard', student.idCard);
+            setFieldValue('birthDate', student.birthDate);
+            setFieldValue('phone', student.phone);
+            setFieldValue('email', student.email);
+            setFieldValue('admissionDate', student.admissionDate);
+            setFieldValue('grade', student.grade);
+            setFieldValue('homeAddress', student.homeAddress);
+            setFieldValue('emergencyContact', student.emergencyContact);
+            setFieldValue('emergencyPhone', student.emergencyPhone);
+ 
+            const majorSelect = form.querySelector('[name="major"]');
+            const classSelect = form.querySelector('[name="className"]');
+            if (majorSelect) {
+                majorSelect.value = student.major || '';
+                if (student.major) {
+                    await loadClassesByMajor(student.major);
+                    if (classSelect) {
+                        classSelect.value = student.className || '';
+                    }
+                } else if (classSelect) {
+                    classSelect.innerHTML = '<option value="">请选择</option>';
+                }
+            }
+ 
             document.getElementById('studentModal').classList.add('show');
         } else {
             showMessage(json.msg || '获取学生信息失败', 'error');
