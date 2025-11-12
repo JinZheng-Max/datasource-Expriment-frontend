@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
 let currentPage = 1;
 let pageSize = 10;
 let totalPages = 1;
+let totalRecords = 0;
 let statusData = [];
 
 function initStatusPage() {
@@ -33,7 +34,9 @@ function initStatusPage() {
 
     loadStudents();
     loadMajors();
-    loadStatusData();
+
+    // 先初始化学籍信息，再加载数据
+    initializeStatusData();
 
     if (typeof initUserMenu === 'function') {
         initUserMenu();
@@ -43,47 +46,74 @@ function initStatusPage() {
     }
 }
 
-function loadStudents() {
-    const students = generateMockStudents(50);
-    const studentSelect = document.getElementById('studentSelect');
+/**
+ * 初始化学籍数据 - 为没有学籍记录的学生创建默认记录
+ */
+async function initializeStatusData() {
+    try {
+        const res = await authFetch('http://localhost:8080/api/status/initialize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const json = await res.json();
 
-    students.forEach(student => {
-        const option = new Option(`${student.student_no} - ${student.name}`, student.student_id);
-        studentSelect.add(option);
-    });
+        if (json.code === 1) {
+            console.log('学籍信息初始化完成');
+        } else {
+            console.error('初始化学籍失败:', json.msg);
+        }
+    } catch (err) {
+        console.error('初始化学籍异常:', err);
+    } finally {
+        // 无论初始化成功与否，都加载数据
+        loadStatusData();
+    }
 }
 
-function generateMockStudents(count) {
-    const students = [];
-    const surnames = ['张', '李', '王', '刘', '陈'];
-    const names = ['伟', '芳', '娜', '敏', '静'];
-
-    for (let i = 1; i <= count; i++) {
-        students.push({
-            student_id: i,
-            student_no: `2021${String(i).padStart(4, '0')}`,
-            name: surnames[Math.floor(Math.random() * surnames.length)] +
-                names[Math.floor(Math.random() * names.length)]
+async function loadStudents() {
+    try {
+        const res = await authFetch('http://localhost:8080/api/student/list', {
+            method: 'GET'
         });
+        const json = await res.json();
+
+        if (json.code === 1 && json.data) {
+            const students = json.data;
+            const studentSelect = document.getElementById('studentSelect');
+            studentSelect.innerHTML = '<option value="">请选择学生</option>';
+
+            students.forEach(student => {
+                const option = new Option(`${student.studentNo} - ${student.name}`, student.studentId);
+                studentSelect.add(option);
+            });
+        } else {
+            console.error('加载学生失败:', json.msg);
+            if (typeof showMessage === 'function') {
+                showMessage(json.msg || '加载学生失败', 'error');
+            }
+        }
+    } catch (err) {
+        console.error('加载学生异常:', err);
+        if (typeof showMessage === 'function') {
+            showMessage('网络异常，请稍后重试', 'error');
+        }
     }
-    return students;
 }
 
 async function loadMajors() {
     try {
-        const token = localStorage.getItem('authentication');
-        const res = await fetch('http://localhost:8080/api/student/major', {
-            method: 'GET',
-            headers: {
-                'authentication': token || ''
-            }
+        const res = await authFetch('http://localhost:8080/api/student/major', {
+            method: 'GET'
         });
         const json = await res.json();
-        
+
         if (json.code === 1 && json.data) {
             const majors = json.data; // 返回的是 List<String>
             const majorSelect = document.getElementById('majorSelect');
-            
+            majorSelect.innerHTML = '<option value="">请选择</option>';
+
             majors.forEach(majorName => {
                 const option = new Option(majorName, majorName);
                 majorSelect.add(option);
@@ -102,63 +132,64 @@ async function loadMajors() {
     }
 }
 
-function loadStatusData() {
-    statusData = generateMockStatus(30);
-    renderStatus();
-}
+async function loadStatusData() {
+    try {
+        const searchText = document.getElementById('searchInput').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const gradeFilter = document.getElementById('gradeFilter').value;
 
-function generateMockStatus(count) {
-    const data = [];
-    const statuses = ['在读', '休学', '退学', '毕业'];
-    const majors = ['计算机科学与技术', '软件工程', '数据科学'];
-    const surnames = ['张', '李', '王', '刘', '陈'];
-    const names = ['伟', '芳', '娜', '敏', '静'];
-
-    for (let i = 1; i <= count; i++) {
-        const grade = Math.floor(Math.random() * 4) + 1;
-        data.push({
-            status_id: i,
-            student_no: `2021${String(i).padStart(4, '0')}`,
-            name: surnames[Math.floor(Math.random() * surnames.length)] +
-                names[Math.floor(Math.random() * names.length)],
-            status: statuses[Math.floor(Math.random() * statuses.length)],
-            current_grade: grade,
-            major_name: majors[Math.floor(Math.random() * majors.length)],
-            status_date: `2024-0${Math.floor(Math.random() * 9) + 1}-15`,
-            reason: '学业正常' + (Math.random() > 0.7 ? ' / 个人原因' : '')
+        const res = await authFetch('http://localhost:8080/api/status/page', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                page: currentPage,
+                pageSize: pageSize,
+                name: searchText || '',
+                status: statusFilter || '',
+                grade: gradeFilter ? parseInt(gradeFilter) : null
+            })
         });
+        const json = await res.json();
+
+        if (json.code === 1 && json.data) {
+            const pageResult = json.data;
+            statusData = pageResult.records || [];
+            totalRecords = pageResult.total || 0;
+            totalPages = Math.ceil(totalRecords / pageSize);
+            renderStatus();
+        } else {
+            showMessage(json.msg || '加载学籍列表失败', 'error');
+        }
+    } catch (err) {
+        console.error('加载学籍列表异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
     }
-    return data;
 }
 
 function renderStatus() {
     const tbody = document.getElementById('statusTableBody');
-    const filteredData = getFilteredStatus();
 
-    totalPages = Math.ceil(filteredData.length / pageSize);
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const pageData = filteredData.slice(startIndex, endIndex);
-
-    if (pageData.length === 0) {
+    if (statusData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">暂无数据</td></tr>';
     } else {
-        tbody.innerHTML = pageData.map(item => {
+        tbody.innerHTML = statusData.map(item => {
             const statusClass = item.status === '在读' ? 'success' :
                 item.status === '毕业' ? 'info' : 'warning';
             return `
             <tr>
-                <td>${item.student_no}</td>
-                <td><strong>${item.name}</strong></td>
-                <td><span class="status-badge status-${statusClass}">${item.status}</span></td>
-                <td>大${item.current_grade}</td>
-                <td>${item.major_name}</td>
-                <td>${item.status_date}</td>
-                <td>${item.reason}</td>
+                <td>${item.studentNo || ''}</td>
+                <td><strong>${item.name || ''}</strong></td>
+                <td><span class="status-badge status-${statusClass}">${item.status || ''}</span></td>
+                <td>${item.currentGrade ? '大' + item.currentGrade : ''}</td>
+                <td>${item.majorName || ''}</td>
+                <td>${item.statusDate || ''}</td>
+                <td>${item.reason || ''}</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-action btn-edit" onclick="editStatus(${item.status_id})">编辑</button>
-                        <button class="btn-action btn-delete" onclick="deleteStatus(${item.status_id})">删除</button>
+                        <button class="btn-action btn-edit" onclick="editStatus(${item.statusId})">编辑</button>
+                        <button class="btn-action btn-delete" onclick="deleteStatus(${item.statusId})">删除</button>
                     </div>
                 </td>
             </tr>
@@ -168,25 +199,9 @@ function renderStatus() {
     renderPagination();
 }
 
-function getFilteredStatus() {
-    const searchText = document.getElementById('searchInput').value.toLowerCase();
-    const statusFilter = document.getElementById('statusFilter').value;
-    const gradeFilter = document.getElementById('gradeFilter').value;
-
-    return statusData.filter(item => {
-        const matchSearch = !searchText ||
-            item.student_no.toLowerCase().includes(searchText) ||
-            item.name.toLowerCase().includes(searchText);
-        const matchStatus = !statusFilter || item.status === statusFilter;
-        const matchGrade = !gradeFilter || item.current_grade.toString() === gradeFilter;
-
-        return matchSearch && matchStatus && matchGrade;
-    });
-}
-
 function filterStatus() {
     currentPage = 1;
-    renderStatus();
+    loadStatusData();
 }
 
 function resetFilters() {
@@ -199,6 +214,10 @@ function resetFilters() {
 function renderPagination() {
     const pagination = document.getElementById('pagination');
     let html = '';
+
+    const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+    const endRecord = Math.min(currentPage * pageSize, totalRecords);
+    html += '<span style="margin-right: 15px; color: #666;">显示 ' + startRecord + '-' + endRecord + ' 条，共 ' + totalRecords + ' 条</span>';
 
     if (currentPage > 1) {
         html += `<button class="page-btn" onclick="changePage(${currentPage - 1})">上一页</button>`;
@@ -221,7 +240,7 @@ function renderPagination() {
 
 function changePage(page) {
     currentPage = page;
-    renderStatus();
+    loadStatusData();
 }
 
 function showAddModal() {
@@ -231,27 +250,56 @@ function showAddModal() {
     document.getElementById('statusModal').classList.add('show');
 }
 
-function editStatus(id) {
-    const item = statusData.find(s => s.status_id === id);
-    if (item) {
-        document.getElementById('modalTitle').textContent = '编辑学籍';
-        const form = document.getElementById('statusForm');
-        form.querySelector('[name="status_id"]').value = item.status_id;
-        form.querySelector('[name="status"]').value = item.status;
-        form.querySelector('[name="status_date"]').value = item.status_date;
-        form.querySelector('[name="current_grade"]').value = item.current_grade;
-        form.querySelector('[name="reason"]').value = item.reason;
+async function editStatus(id) {
+    try {
+        const res = await authFetch(`http://localhost:8080/api/status/${id}`, {
+            method: 'GET'
+        });
+        const json = await res.json();
 
-        document.getElementById('statusModal').classList.add('show');
+        if (json.code === 1 && json.data) {
+            const item = json.data;
+            document.getElementById('modalTitle').textContent = '编辑学籍';
+            const form = document.getElementById('statusForm');
+            form.querySelector('[name="status_id"]').value = item.statusId;
+            form.querySelector('[name="student_id"]').value = item.studentId || '';
+            form.querySelector('[name="status"]').value = item.status;
+            form.querySelector('[name="status_date"]').value = item.statusDate;
+            form.querySelector('[name="current_grade"]').value = item.currentGrade || '';
+            form.querySelector('[name="current_major_id"]').value = item.majorName || '';
+            form.querySelector('[name="reason"]').value = item.reason || '';
+            form.querySelector('[name="remark"]').value = item.remark || '';
+
+            document.getElementById('statusModal').classList.add('show');
+        } else {
+            showMessage(json.msg || '获取学籍信息失败', 'error');
+        }
+    } catch (err) {
+        console.error('获取学籍信息异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
     }
 }
 
-function deleteStatus(id) {
-    const item = statusData.find(s => s.status_id === id);
-    if (item && confirm(`确定要删除 ${item.name} 的学籍记录吗？`)) {
-        statusData = statusData.filter(s => s.status_id !== id);
-        showMessage('删除成功', 'success');
-        renderStatus();
+async function deleteStatus(id) {
+    if (!confirm('确定要删除该学籍记录吗？')) {
+        return;
+    }
+
+    try {
+        const res = await authFetch(`http://localhost:8080/api/status/delete/${id}`, {
+            method: 'DELETE'
+        });
+        const json = await res.json();
+
+        if (json.code === 1) {
+            showMessage('删除成功', 'success');
+            loadStatusData();
+        } else {
+            showMessage(json.msg || '删除失败', 'error');
+        }
+    } catch (err) {
+        console.error('删除学籍异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
     }
 }
 
@@ -259,34 +307,103 @@ function closeModal() {
     document.getElementById('statusModal').classList.remove('show');
 }
 
-function handleSubmit(e) {
+async function handleSubmit(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
 
-    if (data.status_id) {
-        const index = statusData.findIndex(s => s.status_id == data.status_id);
-        if (index !== -1) {
-            statusData[index] = { ...statusData[index], ...data };
-            showMessage('更新成功', 'success');
-        }
-    } else {
-        data.status_id = statusData.length + 1;
-        const studentSelect = document.getElementById('studentSelect');
-        const studentText = studentSelect.options[studentSelect.selectedIndex].text;
-        const [student_no, name] = studentText.split(' - ');
-        data.student_no = student_no;
-        data.name = name;
+    const isEdit = !!data.status_id;
 
-        const majorSelect = document.getElementById('majorSelect');
-        data.major_name = majorSelect.options[majorSelect.selectedIndex].text;
-
-        statusData.push(data);
-        showMessage('添加成功', 'success');
+    // 验证必填字段
+    if (!data.status_date) {
+        showMessage('请选择变更日期', 'error');
+        return;
     }
 
-    closeModal();
-    renderStatus();
+    if (isEdit) {
+        data.statusId = parseInt(data.status_id);
+        delete data.status_id;
+        data.studentId = parseInt(data.student_id);
+        delete data.student_id;
+        // 修改：正确设置日期字段
+        data.statusDate = data.status_date;
+        delete data.status_date;
+        data.currentMajor = data.current_major_id;
+        delete data.current_major_id;
+        if (data.current_grade) {
+            data.currentGrade = parseInt(data.current_grade);
+            delete data.current_grade;
+        }
+        // 删除空字段
+        Object.keys(data).forEach(key => {
+            if (data[key] === '' && key !== 'statusDate') {
+                delete data[key];
+            }
+        });
+
+        try {
+            const res = await authFetch('http://localhost:8080/api/status/update', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+
+            if (json.code === 1) {
+                showMessage('更新成功', 'success');
+                closeModal();
+                loadStatusData();
+            } else {
+                showMessage(json.msg || '更新失败', 'error');
+            }
+        } catch (err) {
+            console.error('更新学籍异常:', err);
+            showMessage('网络异常，请稍后重试', 'error');
+        }
+    } else {
+        delete data.status_id;
+        data.studentId = parseInt(data.student_id);
+        delete data.student_id;
+        // 修改：正确设置日期字段
+        data.statusDate = data.status_date;
+        delete data.status_date;
+        data.currentMajor = data.current_major_id;
+        delete data.current_major_id;
+        if (data.current_grade) {
+            data.currentGrade = parseInt(data.current_grade);
+            delete data.current_grade;
+        }
+        // 删除空字段
+        Object.keys(data).forEach(key => {
+            if (data[key] === '' && key !== 'statusDate') {
+                delete data[key];
+            }
+        });
+
+        try {
+            const res = await authFetch('http://localhost:8080/api/status/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+
+            if (json.code === 1) {
+                showMessage('添加成功', 'success');
+                closeModal();
+                loadStatusData();
+            } else {
+                showMessage(json.msg || '添加失败', 'error');
+            }
+        } catch (err) {
+            console.error('添加学籍异常:', err);
+            showMessage('网络异常，请稍后重试', 'error');
+        }
+    }
 }
 
 // 添加状态徽章样式
