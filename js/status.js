@@ -7,6 +7,7 @@ let pageSize = 10;
 let totalPages = 1;
 let totalRecords = 0;
 let statusData = [];
+let allMajors = []; // 存储所有专业数据
 
 function initStatusPage() {
     // 检查登录态
@@ -21,6 +22,11 @@ function initStatusPage() {
     document.getElementById('resetFilterBtn').addEventListener('click', resetFilters);
     document.getElementById('statusForm').addEventListener('submit', handleSubmit);
 
+    // 添加联动筛选事件
+    document.getElementById('filterGrade').addEventListener('change', updateStudentList);
+    document.getElementById('filterMajor').addEventListener('change', updateStudentList);
+    document.getElementById('studentSelect').addEventListener('change', loadStudentStatus);
+
     const closeButtons = document.querySelectorAll('.modal-close');
     closeButtons.forEach(btn => {
         btn.addEventListener('click', closeModal);
@@ -32,8 +38,7 @@ function initStatusPage() {
         }
     });
 
-    loadStudents();
-    loadMajors();
+    loadAllMajors();
 
     // 先初始化学籍信息，再加载数据
     initializeStatusData();
@@ -72,37 +77,7 @@ async function initializeStatusData() {
     }
 }
 
-async function loadStudents() {
-    try {
-        const res = await authFetch('http://localhost:8080/api/student/list', {
-            method: 'GET'
-        });
-        const json = await res.json();
-
-        if (json.code === 1 && json.data) {
-            const students = json.data;
-            const studentSelect = document.getElementById('studentSelect');
-            studentSelect.innerHTML = '<option value="">请选择学生</option>';
-
-            students.forEach(student => {
-                const option = new Option(`${student.studentNo} - ${student.name}`, student.studentId);
-                studentSelect.add(option);
-            });
-        } else {
-            console.error('加载学生失败:', json.msg);
-            if (typeof showMessage === 'function') {
-                showMessage(json.msg || '加载学生失败', 'error');
-            }
-        }
-    } catch (err) {
-        console.error('加载学生异常:', err);
-        if (typeof showMessage === 'function') {
-            showMessage('网络异常，请稍后重试', 'error');
-        }
-    }
-}
-
-async function loadMajors() {
+async function loadAllMajors() {
     try {
         const res = await authFetch('http://localhost:8080/api/student/major', {
             method: 'GET'
@@ -110,14 +85,9 @@ async function loadMajors() {
         const json = await res.json();
 
         if (json.code === 1 && json.data) {
-            const majors = json.data; // 返回的是 List<String>
-            const majorSelect = document.getElementById('majorSelect');
-            majorSelect.innerHTML = '<option value="">请选择</option>';
-
-            majors.forEach(majorName => {
-                const option = new Option(majorName, majorName);
-                majorSelect.add(option);
-            });
+            allMajors = json.data;
+            // 初始化专业下拉框
+            initMajorSelect();
         } else {
             console.error('加载专业失败:', json.msg);
             if (typeof showMessage === 'function') {
@@ -172,18 +142,19 @@ function renderStatus() {
     const tbody = document.getElementById('statusTableBody');
 
     if (statusData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">暂无数据</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: var(--text-secondary);">暂无数据</td></tr>';
     } else {
         tbody.innerHTML = statusData.map(item => {
             const statusClass = item.status === '在读' ? 'success' :
                 item.status === '毕业' ? 'info' : 'warning';
             return `
             <tr>
+                <td>${item.currentGrade ? '大' + item.currentGrade : ''}</td>
+                <td>${item.majorName || ''}</td>
+                <td>${item.className || ''}</td>
                 <td>${item.studentNo || ''}</td>
                 <td><strong>${item.name || ''}</strong></td>
                 <td><span class="status-badge status-${statusClass}">${item.status || ''}</span></td>
-                <td>${item.currentGrade ? '大' + item.currentGrade : ''}</td>
-                <td>${item.majorName || ''}</td>
                 <td>${item.statusDate || ''}</td>
                 <td>${item.reason || ''}</td>
                 <td>
@@ -247,6 +218,19 @@ function showAddModal() {
     document.getElementById('modalTitle').textContent = '学籍变更';
     document.getElementById('statusForm').reset();
     document.querySelector('input[name="status_id"]').value = '';
+
+    // 重置下拉框
+    document.getElementById('filterGrade').value = '';
+    document.getElementById('filterMajor').value = '';
+    initMajorSelect(); // 重新初始化专业列表
+    document.getElementById('studentSelect').innerHTML = '<option value="">请先选择年级和专业</option>';
+    document.getElementById('studentSelect').disabled = true;
+
+    // 新增模式：启用年级、专业、学生选择
+    document.getElementById('filterGrade').disabled = false;
+    document.getElementById('filterMajor').disabled = false;
+    document.getElementById('studentSelect').disabled = true; // 等选择年级专业后才启用
+
     document.getElementById('statusModal').classList.add('show');
 }
 
@@ -262,11 +246,29 @@ async function editStatus(id) {
             document.getElementById('modalTitle').textContent = '编辑学籍';
             const form = document.getElementById('statusForm');
             form.querySelector('[name="status_id"]').value = item.statusId;
-            form.querySelector('[name="student_id"]').value = item.studentId || '';
+
+            // 直接使用后端返回的数据回显年级、专业、学生
+            if (item.currentGrade && item.majorName && item.name) {
+                // 设置年级
+                document.getElementById('filterGrade').value = item.currentGrade;
+                
+                // 重新初始化专业下拉框并设置专业
+                initMajorSelect();
+                document.getElementById('filterMajor').value = item.majorName;
+                
+                // 编辑模式下，直接设置当前学生到下拉框（不依赖updateStudentList筛选）
+                const studentSelect = document.getElementById('studentSelect');
+                studentSelect.innerHTML = `<option value="${item.studentId}">${item.studentNo} - ${item.name}</option>`;
+                studentSelect.value = item.studentId;
+                
+                // 编辑模式：禁用年级、专业、学生选择（不允许修改）
+                document.getElementById('filterGrade').disabled = true;
+                document.getElementById('filterMajor').disabled = true;
+                document.getElementById('studentSelect').disabled = true;
+            }
+
             form.querySelector('[name="status"]').value = item.status;
             form.querySelector('[name="status_date"]').value = item.statusDate;
-            form.querySelector('[name="current_grade"]').value = item.currentGrade || '';
-            form.querySelector('[name="current_major_id"]').value = item.majorName || '';
             form.querySelector('[name="reason"]').value = item.reason || '';
             form.querySelector('[name="remark"]').value = item.remark || '';
 
@@ -309,100 +311,71 @@ function closeModal() {
 
 async function handleSubmit(e) {
     e.preventDefault();
+    
+    // 编辑模式下，临时启用被禁用的字段以便提交数据
+    const gradeSelect = document.getElementById('filterGrade');
+    const majorSelect = document.getElementById('filterMajor');
+    const studentSelect = document.getElementById('studentSelect');
+    const wasGradeDisabled = gradeSelect.disabled;
+    const wasMajorDisabled = majorSelect.disabled;
+    const wasStudentDisabled = studentSelect.disabled;
+    
+    if (wasGradeDisabled) gradeSelect.disabled = false;
+    if (wasMajorDisabled) majorSelect.disabled = false;
+    if (wasStudentDisabled) studentSelect.disabled = false;
+    
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
-
-    const isEdit = !!data.status_id;
 
     // 验证必填字段
     if (!data.status_date) {
         showMessage('请选择变更日期', 'error');
         return;
     }
+    if (!data.student_id) {
+        showMessage('请选择学生', 'error');
+        return;
+    }
+    if (!data.status_id) {
+        showMessage('未找到学籍记录', 'error');
+        return;
+    }
 
-    if (isEdit) {
-        data.statusId = parseInt(data.status_id);
-        delete data.status_id;
-        data.studentId = parseInt(data.student_id);
-        delete data.student_id;
-        // 修改：正确设置日期字段
-        data.statusDate = data.status_date;
-        delete data.status_date;
-        data.currentMajor = data.current_major_id;
-        delete data.current_major_id;
-        if (data.current_grade) {
-            data.currentGrade = parseInt(data.current_grade);
-            delete data.current_grade;
+    // 统一使用 update 接口
+    data.statusId = parseInt(data.status_id);
+    delete data.status_id;
+    data.studentId = parseInt(data.student_id);
+    delete data.student_id;
+    data.statusDate = data.status_date;
+    delete data.status_date;
+
+    // 删除空字段
+    Object.keys(data).forEach(key => {
+        if (data[key] === '' && key !== 'statusDate') {
+            delete data[key];
         }
-        // 删除空字段
-        Object.keys(data).forEach(key => {
-            if (data[key] === '' && key !== 'statusDate') {
-                delete data[key];
-            }
+    });
+
+    try {
+        const res = await authFetch('http://localhost:8080/api/status/update', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
         });
+        const json = await res.json();
 
-        try {
-            const res = await authFetch('http://localhost:8080/api/status/update', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            const json = await res.json();
-
-            if (json.code === 1) {
-                showMessage('更新成功', 'success');
-                closeModal();
-                loadStatusData();
-            } else {
-                showMessage(json.msg || '更新失败', 'error');
-            }
-        } catch (err) {
-            console.error('更新学籍异常:', err);
-            showMessage('网络异常，请稍后重试', 'error');
+        if (json.code === 1) {
+            showMessage('学籍变更成功', 'success');
+            closeModal();
+            loadStatusData();
+        } else {
+            showMessage(json.msg || '学籍变更失败', 'error');
         }
-    } else {
-        delete data.status_id;
-        data.studentId = parseInt(data.student_id);
-        delete data.student_id;
-        // 修改：正确设置日期字段
-        data.statusDate = data.status_date;
-        delete data.status_date;
-        data.currentMajor = data.current_major_id;
-        delete data.current_major_id;
-        if (data.current_grade) {
-            data.currentGrade = parseInt(data.current_grade);
-            delete data.current_grade;
-        }
-        // 删除空字段
-        Object.keys(data).forEach(key => {
-            if (data[key] === '' && key !== 'statusDate') {
-                delete data[key];
-            }
-        });
-
-        try {
-            const res = await authFetch('http://localhost:8080/api/status/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            const json = await res.json();
-
-            if (json.code === 1) {
-                showMessage('添加成功', 'success');
-                closeModal();
-                loadStatusData();
-            } else {
-                showMessage(json.msg || '添加失败', 'error');
-            }
-        } catch (err) {
-            console.error('添加学籍异常:', err);
-            showMessage('网络异常，请稍后重试', 'error');
-        }
+    } catch (err) {
+        console.error('学籍变更异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
     }
 }
 
@@ -429,3 +402,113 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+/**
+ * 加载选中学生的学籍信息
+ */
+async function loadStudentStatus() {
+    const studentId = document.getElementById('studentSelect').value;
+    if (!studentId) {
+        document.querySelector('input[name="status_id"]').value = '';
+        return;
+    }
+
+    try {
+        const res = await authFetch(`http://localhost:8080/api/status/student/${studentId}`, {
+            method: 'GET'
+        });
+        const json = await res.json();
+
+        if (json.code === 1 && json.data) {
+            const status = json.data;
+            // 设置学籍ID到隐藏字段
+            document.querySelector('input[name="status_id"]').value = status.statusId;
+            // 回显当前学籍信息
+            document.querySelector('[name="status"]').value = status.status;
+            document.querySelector('[name="status_date"]').value = status.statusDate;
+            document.querySelector('[name="reason"]').value = status.reason || '';
+            document.querySelector('[name="remark"]').value = status.remark || '';
+        } else {
+            showMessage('未找到该学生的学籍记录', 'error');
+        }
+    } catch (err) {
+        console.error('加载学籍信息异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
+    }
+}
+
+/**
+ * 初始化专业下拉框
+ */
+function initMajorSelect() {
+    const majorSelect = document.getElementById('filterMajor');
+    majorSelect.innerHTML = '<option value="">请选择专业</option>';
+
+    allMajors.forEach(majorName => {
+        const option = new Option(majorName, majorName);
+        majorSelect.add(option);
+    });
+}
+
+/**
+ * 根据年级和专业更新学生列表
+ */
+async function updateStudentList() {
+    const selectedGrade = document.getElementById('filterGrade').value;
+    const selectedMajor = document.getElementById('filterMajor').value;
+    const studentSelect = document.getElementById('studentSelect');
+
+    studentSelect.innerHTML = '<option value="">请选择学生</option>';
+
+    // 如果年级和专业都未选择，禁用学生下拉框
+    if (!selectedGrade && !selectedMajor) {
+        studentSelect.disabled = true;
+        studentSelect.innerHTML = '<option value="">请先选择年级和专业</option>';
+        return;
+    }
+
+    // 如果只选择了其中一个，提示选择另一个
+    if (!selectedGrade || !selectedMajor) {
+        studentSelect.disabled = true;
+        if (!selectedGrade) {
+            studentSelect.innerHTML = '<option value="">请选择年级</option>';
+        } else {
+            studentSelect.innerHTML = '<option value="">请选择专业</option>';
+        }
+        return;
+    }
+
+    // 调用后端接口根据年级和专业查询学生
+    try {
+        const grade = parseInt(selectedGrade);
+        const res = await authFetch(`http://localhost:8080/api/student/list/by-grade-major?grade=${grade}&majorName=${encodeURIComponent(selectedMajor)}`, {
+            method: 'GET'
+        });
+        const json = await res.json();
+
+        if (json.code === 1 && json.data) {
+            const filteredStudents = json.data;
+            
+            if (filteredStudents.length > 0) {
+                studentSelect.disabled = false;
+                filteredStudents.forEach(student => {
+                    const option = new Option(
+                        `${student.studentNo} - ${student.name}`,
+                        student.studentId
+                    );
+                    studentSelect.add(option);
+                });
+            } else {
+                studentSelect.disabled = true;
+                studentSelect.innerHTML = '<option value="">该年级该专业暂无学生</option>';
+            }
+        } else {
+            studentSelect.disabled = true;
+            studentSelect.innerHTML = '<option value="">加载学生失败</option>';
+        }
+    } catch (err) {
+        console.error('查询学生列表异常:', err);
+        studentSelect.disabled = true;
+        studentSelect.innerHTML = '<option value="">网络异常</option>';
+    }
+}
