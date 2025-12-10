@@ -253,3 +253,38 @@ code {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     color: white;
 }
+
+/* 课程类型徽章样式 */
+.course-badge {
+    padding: 6px 14px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.course-required {
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+}
+
+.course-elective {
+    background: rgba(74, 144, 226, 0.1);
+    color: #4a90e2;
+}
+
+.course-practice {
+    background: rgba(56, 239, 125, 0.1);
+    color: #38ef7d;
+}
+
+/* 课程列表特殊样式 */
+.data-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+/* 课程代码加粗 */
+.data-table td:first-child {
+    font-weight: 600;
+    color: var(--primary-color);
+}

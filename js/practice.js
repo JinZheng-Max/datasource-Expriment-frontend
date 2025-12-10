@@ -5,29 +5,70 @@ document.addEventListener('DOMContentLoaded', function () {
 let currentPage = 1;
 let pageSize = 10;
 let totalPages = 1;
-let practiceData = [];
+let totalRecords = 0;
+let practiceRecords = [];
+let allStudents = [];
+let allActivities = [];
 
 function initPracticePage() {
-    document.getElementById('addPracticeBtn').addEventListener('click', showAddModal);
-    document.getElementById('searchInput').addEventListener('input', filterPractice);
-    document.getElementById('typeFilter').addEventListener('change', filterPractice);
-    document.getElementById('statusFilter').addEventListener('change', filterPractice);
+    if (typeof checkAuth === 'function' && !checkAuth()) {
+        return;
+    }
+
+    // 确保按钮存在后再绑定事件
+    const manageActivitiesBtn = document.getElementById('manageActivitiesBtn');
+    const addRecordBtn = document.getElementById('addRecordBtn');
+    const addActivityBtn = document.getElementById('addActivityBtn');
+
+    if (manageActivitiesBtn) {
+        console.log('绑定活动管理按钮事件');
+        manageActivitiesBtn.addEventListener('click', showActivityModal);
+    } else {
+        console.error('找不到 manageActivitiesBtn 按钮');
+    }
+
+    if (addRecordBtn) {
+        addRecordBtn.addEventListener('click', showAddRecordModal);
+    } else {
+        console.error('找不到 addRecordBtn 按钮');
+    }
+
+    if (addActivityBtn) {
+        addActivityBtn.addEventListener('click', showAddActivityModal);
+    } else {
+        console.error('找不到 addActivityBtn 按钮');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', filterRecords);
+    document.getElementById('typeFilter').addEventListener('change', filterRecords);
+    document.getElementById('statusFilter').addEventListener('change', filterRecords);
     document.getElementById('resetFilterBtn').addEventListener('click', resetFilters);
-    document.getElementById('practiceForm').addEventListener('submit', handleSubmit);
+    document.getElementById('recordForm').addEventListener('submit', handleRecordSubmit);
+    document.getElementById('activityForm').addEventListener('submit', handleActivitySubmit);
 
     const closeButtons = document.querySelectorAll('.modal-close');
+    console.log('找到关闭按钮数量:', closeButtons.length);
     closeButtons.forEach(btn => {
-        btn.addEventListener('click', closeModal);
+        btn.addEventListener('click', function () {
+            console.log('关闭按钮被点击');
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        });
     });
 
-    document.getElementById('practiceModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            closeModal();
-        }
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
     });
 
     loadStudents();
-    loadPracticeData();
+    loadActivities();
+    loadPracticeRecords();
 
     if (typeof initUserMenu === 'function') {
         initUserMenu();
@@ -37,97 +78,109 @@ function initPracticePage() {
     }
 }
 
-function loadStudents() {
-    const students = generateMockStudents(50);
-    const studentSelect = document.getElementById('studentSelect');
+async function loadStudents() {
+    try {
+        const res = await authFetch('http://localhost:8080/api/student/list');
+        const json = await res.json();
 
-    students.forEach(student => {
-        const option = new Option(`${student.student_no} - ${student.name}`, student.student_id);
-        studentSelect.add(option);
-    });
-}
+        if (json.code === 1 && json.data) {
+            allStudents = json.data;
+            const studentSelect = document.getElementById('studentSelect');
+            studentSelect.innerHTML = '<option value="">请选择学生</option>';
 
-function generateMockStudents(count) {
-    const students = [];
-    const surnames = ['张', '李', '王', '刘', '陈', '杨', '赵', '黄'];
-    const names = ['伟', '芳', '娜', '敏', '静', '丽', '强', '磊'];
-
-    for (let i = 1; i <= count; i++) {
-        students.push({
-            student_id: i,
-            student_no: `2021${String(i).padStart(4, '0')}`,
-            name: surnames[Math.floor(Math.random() * surnames.length)] +
-                names[Math.floor(Math.random() * names.length)]
-        });
+            allStudents.forEach(student => {
+                const option = new Option(
+                    `${student.studentNo} - ${student.name}`,
+                    student.studentId
+                );
+                studentSelect.add(option);
+            });
+        }
+    } catch (err) {
+        console.error('加载学生列表异常:', err);
     }
-    return students;
 }
 
-function loadPracticeData() {
-    practiceData = generateMockPractice(40);
-    renderPractice();
-}
+async function loadActivities() {
+    try {
+        const res = await authFetch('http://localhost:8080/api/practice/activity/list');
+        const json = await res.json();
 
-function generateMockPractice(count) {
-    const data = [];
-    const types = ['志愿服务', '社会调查', '实习实践', '科技创新', '文体活动'];
-    const activities = [
-        '社区志愿服务', '敬老院关爱活动', '环保宣传', '支教活动', '市场调研',
-        '企业实习', '创新创业大赛', '文艺汇演', '体育竞赛', '科技展览'
-    ];
-    const roles = ['志愿者', '队长', '组员', '负责人', '参与者'];
-    const statuses = ['待审核', '已通过', '未通过'];
-    const surnames = ['张', '李', '王', '刘', '陈'];
-    const names = ['伟', '芳', '娜', '敏', '静'];
+        if (json.code === 1 && json.data) {
+            allActivities = json.data;
+            const practiceSelect = document.getElementById('practiceSelect');
+            practiceSelect.innerHTML = '<option value="">请选择活动</option>';
 
-    for (let i = 1; i <= count; i++) {
-        const type = types[Math.floor(Math.random() * types.length)];
-        data.push({
-            record_id: i,
-            student_no: `2021${String(i).padStart(4, '0')}`,
-            name: surnames[Math.floor(Math.random() * surnames.length)] +
-                names[Math.floor(Math.random() * names.length)],
-            practice_name: activities[Math.floor(Math.random() * activities.length)],
-            practice_type: type,
-            role: roles[Math.floor(Math.random() * roles.length)],
-            duration: (Math.random() * 40 + 10).toFixed(1),
-            performance_score: (Math.random() * 20 + 80).toFixed(2),
-            status: statuses[Math.floor(Math.random() * statuses.length)]
-        });
+            allActivities.forEach(activity => {
+                const option = new Option(activity.practiceName, activity.practiceId);
+                practiceSelect.add(option);
+            });
+        }
+    } catch (err) {
+        console.error('加载活动列表异常:', err);
     }
-    return data;
 }
 
-function renderPractice() {
+async function loadPracticeRecords() {
+    try {
+        const searchText = document.getElementById('searchInput').value;
+        const practiceType = document.getElementById('typeFilter').value;
+        const status = document.getElementById('statusFilter').value;
+
+        const res = await authFetch('http://localhost:8080/api/practice/record/page', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                page: currentPage,
+                pageSize: pageSize,
+                name: searchText || '',
+                practiceType: practiceType || '',
+                status: status || ''
+            })
+        });
+        const json = await res.json();
+
+        if (json.code === 1 && json.data) {
+            const pageResult = json.data;
+            practiceRecords = pageResult.records || [];
+            totalRecords = pageResult.total || 0;
+            totalPages = Math.ceil(totalRecords / pageSize);
+            renderPracticeRecords();
+        } else {
+            showMessage(json.msg || '加载实践记录失败', 'error');
+        }
+    } catch (err) {
+        console.error('加载实践记录异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
+    }
+}
+
+function renderPracticeRecords() {
     const tbody = document.getElementById('practiceTableBody');
-    const filteredData = getFilteredPractice();
 
-    totalPages = Math.ceil(filteredData.length / pageSize);
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const pageData = filteredData.slice(startIndex, endIndex);
-
-    if (pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: var(--text-secondary);">暂无数据</td></tr>';
+    if (practiceRecords.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px;">暂无数据</td></tr>';
     } else {
-        tbody.innerHTML = pageData.map(item => {
+        tbody.innerHTML = practiceRecords.map(item => {
             const statusClass = item.status === '已通过' ? 'success' :
                 item.status === '待审核' ? 'warning' : 'danger';
             return `
             <tr>
-                <td>${item.student_no}</td>
-                <td><strong>${item.name}</strong></td>
-                <td>${item.practice_name}</td>
-                <td><span class="type-badge type-${item.practice_type}">${item.practice_type}</span></td>
-                <td>${item.role}</td>
-                <td>${item.duration}h</td>
-                <td><span class="score-badge">${item.performance_score}</span></td>
-                <td><span class="status-badge status-${statusClass}">${item.status}</span></td>
+                <td>${item.studentNo || ''}</td>
+                <td><strong>${item.studentName || ''}</strong></td>
+                <td>${item.practiceName || ''}</td>
+                <td><span class="type-badge type-${item.practiceType}">${item.practiceType || ''}</span></td>
+                <td>${item.organizer || ''}</td>
+                <td>${item.role || '-'}</td>
+                <td>${item.duration || '-'}</td>
+                <td>${item.performanceScore || '-'}</td>
+                <td><span class="status-badge status-${statusClass}">${item.status || ''}</span></td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-action btn-view" onclick="viewPractice(${item.record_id})">查看</button>
-                        <button class="btn-action btn-edit" onclick="editPractice(${item.record_id})">编辑</button>
-                        <button class="btn-action btn-delete" onclick="deletePractice(${item.record_id})">删除</button>
+                        <button class="btn-action btn-edit" onclick="editRecord(${item.recordId})">编辑</button>
+                        <button class="btn-action btn-delete" onclick="deleteRecord(${item.recordId})">删除</button>
                     </div>
                 </td>
             </tr>
@@ -137,38 +190,25 @@ function renderPractice() {
     renderPagination();
 }
 
-function getFilteredPractice() {
-    const searchText = document.getElementById('searchInput').value.toLowerCase();
-    const typeFilter = document.getElementById('typeFilter').value;
-    const statusFilter = document.getElementById('statusFilter').value;
-
-    return practiceData.filter(item => {
-        const matchSearch = !searchText ||
-            item.student_no.toLowerCase().includes(searchText) ||
-            item.name.toLowerCase().includes(searchText) ||
-            item.practice_name.toLowerCase().includes(searchText);
-        const matchType = !typeFilter || item.practice_type === typeFilter;
-        const matchStatus = !statusFilter || item.status === statusFilter;
-
-        return matchSearch && matchType && matchStatus;
-    });
-}
-
-function filterPractice() {
+function filterRecords() {
     currentPage = 1;
-    renderPractice();
+    loadPracticeRecords();
 }
 
 function resetFilters() {
     document.getElementById('searchInput').value = '';
     document.getElementById('typeFilter').value = '';
     document.getElementById('statusFilter').value = '';
-    filterPractice();
+    filterRecords();
 }
 
 function renderPagination() {
     const pagination = document.getElementById('pagination');
     let html = '';
+
+    const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+    const endRecord = Math.min(currentPage * pageSize, totalRecords);
+    html += `<span style="margin-right: 15px; color: #666;">显示 ${startRecord}-${endRecord} 条，共 ${totalRecords} 条</span>`;
 
     if (currentPage > 1) {
         html += `<button class="page-btn" onclick="changePage(${currentPage - 1})">上一页</button>`;
@@ -191,120 +231,320 @@ function renderPagination() {
 
 function changePage(page) {
     currentPage = page;
-    renderPractice();
+    loadPracticeRecords();
 }
 
-function showAddModal() {
-    document.getElementById('modalTitle').textContent = '添加实践记录';
-    document.getElementById('practiceForm').reset();
-    document.querySelector('input[name="record_id"]').value = '';
-    document.getElementById('practiceModal').classList.add('show');
+function showAddRecordModal() {
+    document.getElementById('recordModalTitle').textContent = '添加参与记录';
+    document.getElementById('recordForm').reset();
+    document.querySelector('input[name="recordId"]').value = '';
+    document.getElementById('recordModal').classList.add('show');
 }
 
-function viewPractice(id) {
-    const item = practiceData.find(p => p.record_id === id);
-    if (item) {
-        showMessage(`查看实践记录: ${item.practice_name}`, 'info');
+async function editRecord(id) {
+    try {
+        const res = await authFetch(`http://localhost:8080/api/practice/record/${id}`);
+        const json = await res.json();
+
+        if (json.code === 1 && json.data) {
+            const item = json.data;
+            document.getElementById('recordModalTitle').textContent = '编辑参与记录';
+            const form = document.getElementById('recordForm');
+
+            form.querySelector('[name="recordId"]').value = item.recordId;
+            form.querySelector('[name="studentId"]').value = item.studentId;
+            form.querySelector('[name="practiceId"]').value = item.practiceId;
+            form.querySelector('[name="role"]').value = item.role || '';
+            form.querySelector('[name="duration"]').value = item.duration || '';
+            form.querySelector('[name="performanceScore"]').value = item.performanceScore || '';
+            form.querySelector('[name="status"]').value = item.status;
+            form.querySelector('[name="evaluation"]').value = item.evaluation || '';
+
+            document.getElementById('recordModal').classList.add('show');
+        } else {
+            showMessage(json.msg || '获取记录信息失败', 'error');
+        }
+    } catch (err) {
+        console.error('获取记录信息异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
     }
 }
 
-function editPractice(id) {
-    const item = practiceData.find(p => p.record_id === id);
-    if (item) {
-        document.getElementById('modalTitle').textContent = '编辑实践记录';
-        const form = document.getElementById('practiceForm');
-        form.querySelector('[name="record_id"]').value = item.record_id;
-        form.querySelector('[name="practice_name"]').value = item.practice_name;
-        form.querySelector('[name="practice_type"]').value = item.practice_type;
-        form.querySelector('[name="role"]').value = item.role;
-        form.querySelector('[name="duration"]').value = item.duration;
-        form.querySelector('[name="performance_score"]').value = item.performance_score;
-        form.querySelector('[name="status"]').value = item.status;
+async function deleteRecord(id) {
+    if (!confirm('确定要删除该参与记录吗？')) {
+        return;
+    }
 
-        document.getElementById('practiceModal').classList.add('show');
+    try {
+        const res = await authFetch(`http://localhost:8080/api/practice/record/delete/${id}`, {
+            method: 'DELETE'
+        });
+        const json = await res.json();
+
+        if (json.code === 1) {
+            showMessage('删除成功', 'success');
+            loadPracticeRecords();
+        } else {
+            showMessage(json.msg || '删除失败', 'error');
+        }
+    } catch (err) {
+        console.error('删除记录异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
     }
 }
 
-function deletePractice(id) {
-    const item = practiceData.find(p => p.record_id === id);
-    if (item && confirm(`确定要删除 ${item.name} 的实践记录吗？`)) {
-        practiceData = practiceData.filter(p => p.record_id !== id);
-        showMessage('删除成功', 'success');
-        renderPractice();
-    }
-}
-
-function closeModal() {
-    document.getElementById('practiceModal').classList.remove('show');
-}
-
-function handleSubmit(e) {
+async function handleRecordSubmit(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
 
-    if (data.record_id) {
-        const index = practiceData.findIndex(p => p.record_id == data.record_id);
-        if (index !== -1) {
-            practiceData[index] = { ...practiceData[index], ...data };
-            showMessage('更新成功', 'success');
+    const isEdit = !!data.recordId;
+
+    data.studentId = parseInt(data.studentId);
+    data.practiceId = parseInt(data.practiceId);
+    if (data.duration) data.duration = parseFloat(data.duration);
+    if (data.performanceScore) data.performanceScore = parseFloat(data.performanceScore);
+
+    Object.keys(data).forEach(key => {
+        if (data[key] === '' && key !== 'recordId') {
+            delete data[key];
+        }
+    });
+
+    if (isEdit) {
+        data.recordId = parseInt(data.recordId);
+
+        try {
+            const res = await authFetch('http://localhost:8080/api/practice/record/update', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+
+            if (json.code === 1) {
+                showMessage('更新成功', 'success');
+                document.getElementById('recordModal').classList.remove('show');
+                loadPracticeRecords();
+            } else {
+                showMessage(json.msg || '更新失败', 'error');
+            }
+        } catch (err) {
+            console.error('更新记录异常:', err);
+            showMessage('网络异常，请稍后重试', 'error');
         }
     } else {
-        data.record_id = practiceData.length + 1;
-        const studentSelect = document.getElementById('studentSelect');
-        const studentText = studentSelect.options[studentSelect.selectedIndex].text;
-        const [student_no, name] = studentText.split(' - ');
-        data.student_no = student_no;
-        data.name = name;
+        delete data.recordId;
 
-        practiceData.push(data);
-        showMessage('添加成功', 'success');
+        try {
+            const res = await authFetch('http://localhost:8080/api/practice/record/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+
+            if (json.code === 1) {
+                showMessage('添加成功', 'success');
+                document.getElementById('recordModal').classList.remove('show');
+                loadPracticeRecords();
+            } else {
+                showMessage(json.msg || '添加失败', 'error');
+            }
+        } catch (err) {
+            console.error('添加记录异常:', err);
+            showMessage('网络异常，请稍后重试', 'error');
+        }
     }
-
-    closeModal();
-    renderPractice();
 }
 
-// 添加样式
-const style = document.createElement('style');
-style.textContent = `
-    .type-badge {
-        padding: 4px 10px;
-        border-radius: 10px;
-        font-size: 12px;
-        font-weight: 500;
+async function showActivityModal() {
+    console.log('showActivityModal 被调用');
+    try {
+        const res = await authFetch('http://localhost:8080/api/practice/activity/list');
+        const json = await res.json();
+
+        console.log('活动列表响应:', json);
+
+        if (json.code === 1 && json.data) {
+            const activities = json.data;
+            const tbody = document.getElementById('activityTableBody');
+
+            if (!tbody) {
+                console.error('找不到 activityTableBody 元素');
+                return;
+            }
+
+            if (activities.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">暂无活动</td></tr>';
+            } else {
+                tbody.innerHTML = activities.map(item => `
+                    <tr>
+                        <td><strong>${item.practiceName || ''}</strong></td>
+                        <td>${item.practiceType || ''}</td>
+                        <td>${item.organizer || ''}</td>
+                        <td>${item.startDate || ''}</td>
+                        <td>${item.endDate || ''}</td>
+                        <td>
+                            <button class="btn-action btn-edit" onclick="editActivity(${item.practiceId})">编辑</button>
+                            <button class="btn-action btn-delete" onclick="deleteActivity(${item.practiceId})">删除</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            const activityModal = document.getElementById('activityModal');
+            if (activityModal) {
+                console.log('显示活动管理模态框');
+                activityModal.classList.add('show');
+            } else {
+                console.error('找不到 activityModal 元素');
+            }
+        } else {
+            showMessage(json.msg || '加载活动列表失败', 'error');
+        }
+    } catch (err) {
+        console.error('加载活动列表异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
     }
-    .type-志愿服务 {
-        background: rgba(102, 126, 234, 0.1);
-        color: #667eea;
+}
+
+function showAddActivityModal() {
+    console.log('showAddActivityModal 被调用');
+    document.getElementById('activityModalTitle').textContent = '添加活动';
+    document.getElementById('activityForm').reset();
+    const practiceIdInput = document.querySelector('input[name="practiceId"]');
+    if (practiceIdInput) {
+        practiceIdInput.value = '';
     }
-    .type-社会调查 {
-        background: rgba(240, 147, 251, 0.1);
-        color: #f093fb;
+
+    const activityEditModal = document.getElementById('activityEditModal');
+    if (activityEditModal) {
+        console.log('显示活动编辑模态框');
+        activityEditModal.classList.add('show');
+    } else {
+        console.error('找不到 activityEditModal 元素');
     }
-    .type-实习实践 {
-        background: rgba(56, 239, 125, 0.1);
-        color: #38ef7d;
+}
+
+async function editActivity(id) {
+    try {
+        const res = await authFetch(`http://localhost:8080/api/practice/activity/${id}`);
+        const json = await res.json();
+
+        if (json.code === 1 && json.data) {
+            const item = json.data;
+            document.getElementById('activityModalTitle').textContent = '编辑活动';
+            const form = document.getElementById('activityForm');
+
+            form.querySelector('[name="practiceId"]').value = item.practiceId;
+            form.querySelector('[name="practiceName"]').value = item.practiceName;
+            form.querySelector('[name="practiceType"]').value = item.practiceType;
+            form.querySelector('[name="organizer"]').value = item.organizer || '';
+            form.querySelector('[name="startDate"]').value = item.startDate || '';
+            form.querySelector('[name="endDate"]').value = item.endDate || '';
+            form.querySelector('[name="description"]').value = item.description || '';
+
+            document.getElementById('activityEditModal').classList.add('show');
+        } else {
+            showMessage(json.msg || '获取活动信息失败', 'error');
+        }
+    } catch (err) {
+        console.error('获取活动信息异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
     }
-    .type-科技创新 {
-        background: rgba(79, 172, 254, 0.1);
-        color: #4facfe;
+}
+
+async function deleteActivity(id) {
+    if (!confirm('确定要删除该活动吗？删除后相关参与记录也将无法关联！')) {
+        return;
     }
-    .type-文体活动 {
-        background: rgba(250, 112, 154, 0.1);
-        color: #fa709a;
+
+    try {
+        const res = await authFetch(`http://localhost:8080/api/practice/activity/delete/${id}`, {
+            method: 'DELETE'
+        });
+        const json = await res.json();
+
+        if (json.code === 1) {
+            showMessage('删除成功', 'success');
+            showActivityModal();
+            loadActivities();
+        } else {
+            showMessage(json.msg || '删除失败', 'error');
+        }
+    } catch (err) {
+        console.error('删除活动异常:', err);
+        showMessage('网络异常，请稍后重试', 'error');
     }
-    .score-badge {
-        padding: 4px 10px;
-        border-radius: 10px;
-        font-size: 12px;
-        font-weight: 600;
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        color: white;
+}
+
+async function handleActivitySubmit(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+
+    const isEdit = !!data.practiceId;
+
+    Object.keys(data).forEach(key => {
+        if (data[key] === '' && key !== 'practiceId') {
+            delete data[key];
+        }
+    });
+
+    if (isEdit) {
+        data.practiceId = parseInt(data.practiceId);
+
+        try {
+            const res = await authFetch('http://localhost:8080/api/practice/activity/update', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+
+            if (json.code === 1) {
+                showMessage('更新成功', 'success');
+                document.getElementById('activityEditModal').classList.remove('show');
+                showActivityModal();
+                loadActivities();
+            } else {
+                showMessage(json.msg || '更新失败', 'error');
+            }
+        } catch (err) {
+            console.error('更新活动异常:', err);
+            showMessage('网络异常，请稍后重试', 'error');
+        }
+    } else {
+        delete data.practiceId;
+
+        try {
+            const res = await authFetch('http://localhost:8080/api/practice/activity/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+
+            if (json.code === 1) {
+                showMessage('添加成功', 'success');
+                document.getElementById('activityEditModal').classList.remove('show');
+                showActivityModal();
+                loadActivities();
+            } else {
+                showMessage(json.msg || '添加失败', 'error');
+            }
+        } catch (err) {
+            console.error('添加活动异常:', err);
+            showMessage('网络异常，请稍后重试', 'error');
+        }
     }
-    .status-danger {
-        background: rgba(250, 112, 154, 0.1);
-        color: var(--danger-color);
-    }
-`;
-document.head.appendChild(style);
+}

@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>社会实践管理 - 学生信息管理系统</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>社会实践 - 学生信息管理系统</title>
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/students.css">
     <link rel="stylesheet" href="../css/practice.css">
@@ -37,35 +40,35 @@
         <!-- 侧边栏 -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
-                <div class="nav-item" data-page="dashboard" onclick="location.href='index.html'">
+                <div class="nav-item" onclick="location.href='index.html'">
                     <span class="nav-icon">📊</span>
                     <span class="nav-text">数据概览</span>
                 </div>
-                <div class="nav-item" data-page="students" onclick="location.href='students.html'">
+                <div class="nav-item" onclick="location.href='students.html'">
                     <span class="nav-icon">👨‍🎓</span>
                     <span class="nav-text">学生管理</span>
                 </div>
-                <div class="nav-item" data-page="status" onclick="location.href='status.html'">
+                <div class="nav-item" onclick="location.href='status.html'">
                     <span class="nav-icon">📋</span>
                     <span class="nav-text">学籍管理</span>
                 </div>
-                <div class="nav-item active" data-page="practice">
+                <div class="nav-item active">
                     <span class="nav-icon">🏆</span>
                     <span class="nav-text">社会实践</span>
                 </div>
-                <div class="nav-item" data-page="reward" onclick="location.href='reward.html'">
+                <div class="nav-item" onclick="location.href='reward.html'">
                     <span class="nav-icon">🎖️</span>
                     <span class="nav-text">奖惩管理</span>
                 </div>
-                <div class="nav-item" data-page="scores" onclick="location.href='scores.html'">
+                <div class="nav-item" onclick="location.href='scores.html'">
                     <span class="nav-icon">📝</span>
                     <span class="nav-text">成绩管理</span>
                 </div>
-                <div class="nav-item" data-page="courses" onclick="location.href='courses.html'">
+                <div class="nav-item" onclick="location.href='courses.html'">
                     <span class="nav-icon">📚</span>
                     <span class="nav-text">课程管理</span>
                 </div>
-                <div class="nav-item" data-page="profile" onclick="location.href='profile.html'">
+                <div class="nav-item" onclick="location.href='profile.html'">
                     <span class="nav-icon">👤</span>
                     <span class="nav-text">个人信息</span>
                 </div>
@@ -83,18 +86,24 @@
             <div class="page-header">
                 <div>
                     <h2>🏆 社会实践管理</h2>
-                    <p class="subtitle">记录与管理学生社会实践活动</p>
+                    <p class="subtitle">记录学生参与社会实践活动情况</p>
                 </div>
-                <button class="btn-primary" id="addPracticeBtn">
-                    <span class="btn-icon">➕</span>
-                    添加实践记录
-                </button>
+                <div class="header-buttons">
+                    <button class="btn-secondary" id="manageActivitiesBtn">
+                        <span class="btn-icon">📋</span>
+                        活动管理
+                    </button>
+                    <button class="btn-primary" id="addRecordBtn">
+                        <span class="btn-icon">➕</span>
+                        添加参与记录
+                    </button>
+                </div>
             </div>
 
             <!-- 搜索和筛选区域 -->
             <div class="filter-section">
                 <div class="filter-group">
-                    <input type="text" id="searchInput" placeholder="搜索学生、活动名称..." class="search-input">
+                    <input type="text" id="searchInput" placeholder="搜索学生、活动..." class="search-input">
                     <select id="typeFilter" class="filter-select">
                         <option value="">全部类型</option>
                         <option value="志愿服务">志愿服务</option>
@@ -113,19 +122,20 @@
                 </div>
             </div>
 
-            <!-- 实践记录列表 -->
+            <!-- 参与记录列表 -->
             <div class="table-container">
-                <table class="data-table" id="practiceTable">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>学号</th>
                             <th>姓名</th>
                             <th>活动名称</th>
                             <th>活动类型</th>
+                            <th>组织单位</th>
                             <th>担任角色</th>
                             <th>时长(小时)</th>
                             <th>评分</th>
-                            <th>审核状态</th>
+                            <th>状态</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -140,31 +150,122 @@
         </main>
     </div>
 
-    <!-- 添加/编辑实践记录模态框 -->
-    <div class="modal" id="practiceModal">
-        <div class="modal-content modal-large">
+    <!-- 学生参与记录模态框 -->
+    <div class="modal" id="recordModal">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">添加实践记录</h3>
+                <h3 id="recordModalTitle">添加参与记录</h3>
                 <span class="modal-close">&times;</span>
             </div>
             <div class="modal-body">
-                <form id="practiceForm">
+                <form id="recordForm">
                     <div class="form-row">
                         <div class="form-group">
                             <label>学生 <span class="required">*</span></label>
-                            <select name="student_id" required id="studentSelect">
+                            <select name="studentId" id="studentSelect" required>
                                 <option value="">请选择学生</option>
                             </select>
                         </div>
                         <div class="form-group">
+                            <label>活动 <span class="required">*</span></label>
+                            <select name="practiceId" id="practiceSelect" required>
+                                <option value="">请选择活动</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>担任角色</label>
+                            <input type="text" name="role" placeholder="如：志愿者、队长、成员">
+                        </div>
+                        <div class="form-group">
+                            <label>时长(小时)</label>
+                            <input type="number" name="duration" step="0.5" min="0" placeholder="参与时长">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>表现评分</label>
+                            <input type="number" name="performanceScore" step="0.01" min="0" max="100"
+                                placeholder="0-100分">
+                        </div>
+                        <div class="form-group">
+                            <label>审核状态 <span class="required">*</span></label>
+                            <select name="status" required>
+                                <option value="待审核">待审核</option>
+                                <option value="已通过">已通过</option>
+                                <option value="未通过">未通过</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>评价</label>
+                            <textarea name="evaluation" rows="3" placeholder="对学生表现的评价"></textarea>
+                        </div>
+                    </div>
+                    <input type="hidden" name="recordId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary modal-close">取消</button>
+                <button type="submit" form="recordForm" class="btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 活动管理模态框 -->
+    <div class="modal" id="activityModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>社会实践活动管理</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="activity-header">
+                    <button class="btn-primary" id="addActivityBtn">
+                        <span class="btn-icon">➕</span>
+                        添加活动
+                    </button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>活动名称</th>
+                            <th>活动类型</th>
+                            <th>组织单位</th>
+                            <th>开始日期</th>
+                            <th>结束日期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTableBody">
+                        <!-- 活动列表 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 活动编辑模态框 -->
+    <div class="modal" id="activityEditModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="activityModalTitle">添加活动</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="activityForm">
+                    <div class="form-row">
+                        <div class="form-group full-width">
                             <label>活动名称 <span class="required">*</span></label>
-                            <input type="text" name="practice_name" required>
+                            <input type="text" name="practiceName" required placeholder="如：敬老院志愿服务">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>活动类型 <span class="required">*</span></label>
-                            <select name="practice_type" required>
+                            <select name="practiceType" required>
                                 <option value="">请选择</option>
                                 <option value="志愿服务">志愿服务</option>
                                 <option value="社会调查">社会调查</option>
@@ -175,59 +276,31 @@
                         </div>
                         <div class="form-group">
                             <label>组织单位</label>
-                            <input type="text" name="organizer">
-                        </div>
-                        <div class="form-group">
-                            <label>担任角色</label>
-                            <input type="text" name="role" placeholder="如：志愿者、队长等">
+                            <input type="text" name="organizer" placeholder="如：校团委、学院">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>开始日期</label>
-                            <input type="date" name="start_date">
+                            <input type="date" name="startDate">
                         </div>
                         <div class="form-group">
                             <label>结束日期</label>
-                            <input type="date" name="end_date">
-                        </div>
-                        <div class="form-group">
-                            <label>时长(小时)</label>
-                            <input type="number" name="duration" step="0.5" min="0">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>表现评分 (0-100)</label>
-                            <input type="number" name="performance_score" min="0" max="100" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>审核状态</label>
-                            <select name="status">
-                                <option value="待审核">待审核</option>
-                                <option value="已通过">已通过</option>
-                                <option value="未通过">未通过</option>
-                            </select>
+                            <input type="date" name="endDate">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group full-width">
                             <label>活动描述</label>
-                            <textarea name="description" rows="3"></textarea>
+                            <textarea name="description" rows="4" placeholder="活动的详细说明"></textarea>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group full-width">
-                            <label>评价</label>
-                            <textarea name="evaluation" rows="2"></textarea>
-                        </div>
-                    </div>
-                    <input type="hidden" name="record_id">
+                    <input type="hidden" name="practiceId">
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-secondary modal-close">取消</button>
-                <button type="submit" form="practiceForm" class="btn-primary">保存</button>
+                <button type="submit" form="activityForm" class="btn-primary">保存</button>
             </div>
         </div>
     </div>

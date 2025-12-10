@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>成绩管理 - 学生信息管理系统</title>
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/students.css">
@@ -35,35 +36,35 @@
     <div class="main-container">
         <aside class="sidebar">
             <nav class="sidebar-nav">
-                <div class="nav-item" data-page="dashboard" onclick="location.href='index.html'">
+                <div class="nav-item" onclick="location.href='index.html'">
                     <span class="nav-icon">📊</span>
                     <span class="nav-text">数据概览</span>
                 </div>
-                <div class="nav-item" data-page="students" onclick="location.href='students.html'">
+                <div class="nav-item" onclick="location.href='students.html'">
                     <span class="nav-icon">👨‍🎓</span>
                     <span class="nav-text">学生管理</span>
                 </div>
-                <div class="nav-item" data-page="status" onclick="location.href='status.html'">
+                <div class="nav-item" onclick="location.href='status.html'">
                     <span class="nav-icon">📋</span>
                     <span class="nav-text">学籍管理</span>
                 </div>
-                <div class="nav-item" data-page="practice" onclick="location.href='practice.html'">
+                <div class="nav-item" onclick="location.href='practice.html'">
                     <span class="nav-icon">🏆</span>
                     <span class="nav-text">社会实践</span>
                 </div>
-                <div class="nav-item" data-page="reward" onclick="location.href='reward.html'">
+                <div class="nav-item" onclick="location.href='reward.html'">
                     <span class="nav-icon">🎖️</span>
                     <span class="nav-text">奖惩管理</span>
                 </div>
-                <div class="nav-item active" data-page="scores">
+                <div class="nav-item active">
                     <span class="nav-icon">📝</span>
                     <span class="nav-text">成绩管理</span>
                 </div>
-                <div class="nav-item" data-page="courses" onclick="location.href='courses.html'">
+                <div class="nav-item" onclick="location.href='courses.html'">
                     <span class="nav-icon">📚</span>
                     <span class="nav-text">课程管理</span>
                 </div>
-                <div class="nav-item" data-page="profile" onclick="location.href='profile.html'">
+                <div class="nav-item" onclick="location.href='profile.html'">
                     <span class="nav-icon">👤</span>
                     <span class="nav-text">个人信息</span>
                 </div>
@@ -80,7 +81,7 @@
             <div class="page-header">
                 <div>
                     <h2>📝 成绩管理</h2>
-                    <p class="subtitle">全面记录与管理学生成绩信息</p>
+                    <p class="subtitle">记录和管理学生每学期课程成绩</p>
                 </div>
                 <button class="btn-primary" id="addScoreBtn">
                     <span class="btn-icon">➕</span>
@@ -90,38 +91,43 @@
 
             <div class="filter-section">
                 <div class="filter-group">
-                    <input type="text" id="searchInput" placeholder="搜索学号、姓名、课程..." class="search-input">
+                    <input type="text" id="searchInput" placeholder="搜索学号、姓名..." class="search-input">
                     <select id="semesterFilter" class="filter-select">
                         <option value="">全部学期</option>
-                        <option value="2024-1">2024-2025学年第一学期</option>
-                        <option value="2023-2">2023-2024学年第二学期</option>
-                        <option value="2023-1">2023-2024学年第一学期</option>
+                        <option value="1">第一学期</option>
+                        <option value="2">第二学期</option>
+                        <option value="3">第三学期</option>
+                        <option value="4">第四学期</option>
+                        <option value="5">第五学期</option>
+                        <option value="6">第六学期</option>
+                        <option value="7">第七学期</option>
+                        <option value="8">第八学期</option>
                     </select>
                     <select id="courseFilter" class="filter-select">
                         <option value="">全部课程</option>
                     </select>
                     <select id="passFilter" class="filter-select">
                         <option value="">全部状态</option>
-                        <option value="1">及格</option>
-                        <option value="0">不及格</option>
+                        <option value="true">已通过</option>
+                        <option value="false">未通过</option>
                     </select>
                     <button class="btn-secondary" id="resetFilterBtn">重置</button>
-                    <button class="btn-secondary" id="exportBtn">📊 导出成绩</button>
                 </div>
             </div>
 
             <div class="table-container">
-                <table class="data-table" id="scoreTable">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>学号</th>
                             <th>姓名</th>
-                            <th>课程名称</th>
                             <th>学期</th>
-                            <th>平时成绩</th>
-                            <th>期中成绩</th>
-                            <th>期末成绩</th>
-                            <th>总评成绩</th>
+                            <th>课程</th>
+                            <th>学分</th>
+                            <th>平时</th>
+                            <th>期中</th>
+                            <th>期末</th>
+                            <th>总评</th>
                             <th>绩点</th>
                             <th>状态</th>
                             <th>操作</th>
@@ -135,8 +141,9 @@
         </main>
     </div>
 
+    <!-- 成绩录入模态框 -->
     <div class="modal" id="scoreModal">
-        <div class="modal-content modal-large">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalTitle">录入成绩</h3>
                 <span class="modal-close">&times;</span>
@@ -146,47 +153,57 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>学生 <span class="required">*</span></label>
-                            <select name="student_id" required id="studentSelect">
+                            <select name="studentId" id="studentSelect" required>
                                 <option value="">请选择学生</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>课程 <span class="required">*</span></label>
-                            <select name="course_id" required id="courseSelect">
-                                <option value="">请选择课程</option>
+                            <label>学期 <span class="required">*</span></label>
+                            <select name="semesterId" id="semesterSelect" required>
+                                <option value="">请选择学期</option>
+                                <option value="1">第一学期</option>
+                                <option value="2">第二学期</option>
+                                <option value="3">第三学期</option>
+                                <option value="4">第四学期</option>
+                                <option value="5">第五学期</option>
+                                <option value="6">第六学期</option>
+                                <option value="7">第七学期</option>
+                                <option value="8">第八学期</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>学期 <span class="required">*</span></label>
-                            <select name="semester_id" required id="semesterSelect">
-                                <option value="">请选择学期</option>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>课程 <span class="required">*</span></label>
+                            <select name="courseId" id="courseSelect" required>
+                                <option value="">请选择课程</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>平时成绩</label>
-                            <input type="number" name="regular_score" min="0" max="100" step="0.01" id="regularScore">
+                            <input type="number" name="regularScore" step="0.01" min="0" max="100">
                         </div>
                         <div class="form-group">
                             <label>期中成绩</label>
-                            <input type="number" name="midterm_score" min="0" max="100" step="0.01" id="midtermScore">
-                        </div>
-                        <div class="form-group">
-                            <label>期末成绩</label>
-                            <input type="number" name="final_score" min="0" max="100" step="0.01" id="finalScore">
+                            <input type="number" name="midtermScore" step="0.01" min="0" max="100">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>总评成绩 <span class="required">*</span></label>
-                            <input type="number" name="total_score" min="0" max="100" step="0.01" required readonly
-                                id="totalScore">
+                            <label>期末成绩</label>
+                            <input type="number" name="finalScore" step="0.01" min="0" max="100">
                         </div>
                         <div class="form-group">
+                            <label>总评成绩 <span class="required">*</span></label>
+                            <input type="number" name="totalScore" step="0.01" min="0" max="100" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
                             <label>绩点</label>
-                            <input type="number" name="grade_point" min="0" max="5" step="0.01" readonly
-                                id="gradePoint">
+                            <input type="number" name="gradePoint" step="0.01" min="0" max="5">
                         </div>
                         <div class="form-group">
                             <label>考试状态</label>
@@ -200,15 +217,15 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>授课教师</label>
-                            <input type="text" name="teacher_name">
+                            <label>是否通过</label>
+                            <select name="isPass">
+                                <option value="true">通过</option>
+                                <option value="false">未通过</option>
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label>是否重修</label>
-                            <select name="is_retake">
-                                <option value="0">否</option>
-                                <option value="1">是</option>
-                            </select>
+                            <label>授课教师</label>
+                            <input type="text" name="teacherName">
                         </div>
                     </div>
                     <div class="form-row">
@@ -217,8 +234,7 @@
                             <textarea name="remark" rows="2"></textarea>
                         </div>
                     </div>
-                    <input type="hidden" name="score_id">
-                    <input type="hidden" name="is_pass" id="isPass">
+                    <input type="hidden" name="scoreId">
                 </form>
             </div>
             <div class="modal-footer">

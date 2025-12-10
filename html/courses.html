@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>课程管理 - 学生信息管理系统</title>
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/students.css">
@@ -11,6 +14,7 @@
 </head>
 
 <body>
+    <!-- 顶部导航栏 -->
     <header class="top-header">
         <div class="header-left">
             <div class="logo">📚</div>
@@ -33,6 +37,7 @@
     </header>
 
     <div class="main-container">
+        <!-- 侧边栏 -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <div class="nav-item" data-page="dashboard" onclick="location.href='index.html'">
@@ -76,11 +81,12 @@
             </div>
         </aside>
 
+        <!-- 主内容区 -->
         <main class="main-content">
             <div class="page-header">
                 <div>
                     <h2>📚 课程管理</h2>
-                    <p class="subtitle">管理课程信息与教学计划</p>
+                    <p class="subtitle">管理课程信息，包括课程代码、名称、学分等</p>
                 </div>
                 <button class="btn-primary" id="addCourseBtn">
                     <span class="btn-icon">➕</span>
@@ -88,10 +94,11 @@
                 </button>
             </div>
 
+            <!-- 搜索和筛选区域 -->
             <div class="filter-section">
                 <div class="filter-group">
                     <input type="text" id="searchInput" placeholder="搜索课程代码、课程名称..." class="search-input">
-                    <select id="typeFilter" class="filter-select">
+                    <select id="courseTypeFilter" class="filter-select">
                         <option value="">全部类型</option>
                         <option value="必修">必修</option>
                         <option value="选修">选修</option>
@@ -104,6 +111,7 @@
                 </div>
             </div>
 
+            <!-- 课程列表 -->
             <div class="table-container">
                 <table class="data-table" id="courseTable">
                     <thead>
@@ -118,14 +126,18 @@
                             <th>操作</th>
                         </tr>
                     </thead>
-                    <tbody id="courseTableBody"></tbody>
+                    <tbody id="courseTableBody">
+                        <!-- 数据将通过JavaScript动态加载 -->
+                    </tbody>
                 </table>
             </div>
 
+            <!-- 分页 -->
             <div class="pagination" id="pagination"></div>
         </main>
     </div>
 
+    <!-- 课程模态框 -->
     <div class="modal" id="courseModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -137,17 +149,17 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>课程代码 <span class="required">*</span></label>
-                            <input type="text" name="course_code" required>
+                            <input type="text" name="courseCode" required placeholder="如：CS101">
                         </div>
                         <div class="form-group">
                             <label>课程名称 <span class="required">*</span></label>
-                            <input type="text" name="course_name" required>
+                            <input type="text" name="courseName" required placeholder="如：数据结构">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>课程类型 <span class="required">*</span></label>
-                            <select name="course_type" required>
+                            <select name="courseType" required>
                                 <option value="">请选择</option>
                                 <option value="必修">必修</option>
                                 <option value="选修">选修</option>
@@ -156,24 +168,18 @@
                         </div>
                         <div class="form-group">
                             <label>学分 <span class="required">*</span></label>
-                            <input type="number" name="credits" step="0.5" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label>学时</label>
-                            <input type="number" name="hours" min="0">
+                            <input type="number" name="credits" required step="0.5" min="0" placeholder="如：3.0">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>所属专业</label>
-                            <select name="major_id" id="majorSelect">
-                                <option value="">公共课</option>
-                            </select>
+                            <label>学时</label>
+                            <input type="number" name="hours" min="0" placeholder="如：48">
                         </div>
                         <div class="form-group">
-                            <label>建议修读学期</label>
-                            <select name="semester_order">
-                                <option value="">不限</option>
+                            <label>建议学期</label>
+                            <select name="semesterOrder">
+                                <option value="">请选择</option>
                                 <option value="1">第一学期</option>
                                 <option value="2">第二学期</option>
                                 <option value="3">第三学期</option>
@@ -187,11 +193,19 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group full-width">
-                            <label>课程描述</label>
-                            <textarea name="description" rows="3"></textarea>
+                            <label>所属专业</label>
+                            <select name="majorId" id="modalMajorSelect">
+                                <option value="">公共课（所有专业）</option>
+                            </select>
                         </div>
                     </div>
-                    <input type="hidden" name="course_id">
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>课程描述</label>
+                            <textarea name="description" rows="3" placeholder="课程简介、教学目标等"></textarea>
+                        </div>
+                    </div>
+                    <input type="hidden" name="courseId">
                 </form>
             </div>
             <div class="modal-footer">
