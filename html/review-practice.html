@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社会实践审核 - 学生信息管理系统</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/students.css">
+    <script>
+        if (!new URLSearchParams(location.search).has('standalone')) location.replace('practice.html');
+    </script>
+</head>
+
+<body>
+    <header class="top-header">
+        <div class="header-left">
+            <div class="logo">📚</div>
+            <h1>学生信息管理系统</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23667eea'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='Arial'%3E管%3C/text%3E%3C/svg%3E"
+                        alt="用户头像">
+                    <span class="username">系统管理员</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="location.href='index.html'"><span class="nav-icon">📊</span><span class="nav-text">数据概览</span></div>
+                <div class="nav-item" onclick="location.href='students.html'"><span class="nav-icon">👨‍🎓</span><span class="nav-text">学生管理</span></div>
+                <div class="nav-item" onclick="location.href='status.html'"><span class="nav-icon">📋</span><span class="nav-text">学籍管理</span></div>
+                <div class="nav-item" onclick="location.href='practice.html'"><span class="nav-icon">🏆</span><span class="nav-text">社会实践</span></div>
+                <div class="nav-item active"><span class="nav-icon">✅</span><span class="nav-text">实践审核</span></div>
+                <div class="nav-item" onclick="location.href='reward.html'"><span class="nav-icon">🎖️</span><span class="nav-text">奖惩管理</span></div>
+                <div class="nav-item" onclick="location.href='review-reward.html'"><span class="nav-icon">📝</span><span class="nav-text">奖励审核</span></div>
+                <div class="nav-item" onclick="location.href='scores.html'"><span class="nav-icon">📝</span><span class="nav-text">成绩管理</span></div>
+                <div class="nav-item" onclick="location.href='courses.html'"><span class="nav-icon">📚</span><span class="nav-text">课程管理</span></div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span class="nav-text">退出登录</span></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>✅ 社会实践审核</h2>
+                    <p class="subtitle">审核学生提交的社会实践申请</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>学号</th>
+                            <th>姓名</th>
+                            <th>活动名称</th>
+                            <th>活动类型</th>
+                            <th>担任角色</th>
+                            <th>时长</th>
+                            <th>申请时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingTableBody">
+                        <tr><td colspan="8" class="empty-message">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </main>
+    </div>
+
+    <!-- 审核弹窗 -->
+    <div class="modal-overlay" id="reviewModal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>审核社会实践申请</h3>
+                <button class="modal-close" onclick="hideReviewModal()">&times;</button>
+            </div>
+            <div id="reviewInfo" class="review-info"></div>
+            <form id="reviewForm">
+                <input type="hidden" id="recordId" name="recordId">
+                <div class="form-group">
+                    <label>审核结果 <span class="required">*</span></label>
+                    <select id="status" name="status" required>
+                        <option value="">请选择</option>
+                        <option value="已通过">通过</option>
+                        <option value="未通过">不通过</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>表现评分</label>
+                    <input type="number" id="performanceScore" name="performanceScore" min="0" max="100" step="0.1" placeholder="0-100分">
+                </div>
+                <div class="form-group">
+                    <label>评价</label>
+                    <textarea id="evaluation" name="evaluation" rows="2" placeholder="对学生表现的评价"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>审核意见</label>
+                    <textarea id="reviewComment" name="reviewComment" rows="2" placeholder="审核意见（可选）"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="hideReviewModal()">取消</button>
+                    <button type="submit" class="btn-primary">提交审核</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .table-container { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .data-table th { background: var(--bg-secondary); font-weight: 600; color: var(--text-secondary); font-size: 13px; }
+        .data-table td { font-size: 14px; color: var(--text-primary); }
+        .data-table tbody tr:hover { background: var(--bg-secondary); }
+        .empty-message { text-align: center; color: var(--text-secondary); padding: 40px !important; }
+        .btn-review { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .btn-review:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; }
+        .btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #ddd; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; border-radius: 16px; width: 500px; max-width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .modal-header h3 { margin: 0; font-size: 18px; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        #reviewForm { padding: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 14px; color: #666; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+        .required { color: #f44336; }
+        .review-info { padding: 0 20px; background: #f9f9f9; margin: 0 20px; border-radius: 8px; }
+        .review-info p { margin: 8px 0; font-size: 14px; }
+        .review-info strong { color: #333; }
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .pagination button { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; }
+        .pagination button.active { background: #667eea; color: white; border-color: #667eea; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+
+    <script src="../js/common.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentRecord = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof initLogout === 'function') initLogout();
+            loadPendingList();
+            initReviewForm();
+        });
+
+        async function loadPendingList(page = 1) {
+            currentPage = page;
+            try {
+                const res = await authFetch(`${API_BASE}/review/practice/pending?page=${page}&pageSize=10`);
+                const data = await res.json();
+                
+                const tbody = document.getElementById('pendingTableBody');
+                
+                if (data.code === 1 && data.data) {
+                    const result = data.data;
+                    totalPages = Math.ceil(result.total / 10) || 1;
+                    
+                    if (result.records && result.records.length > 0) {
+                        tbody.innerHTML = result.records.map(item => `
+                            <tr>
+                                <td>${item.studentNo || '-'}</td>
+                                <td>${item.studentName || '-'}</td>
+                                <td>${item.practiceName || '-'}</td>
+                                <td>${item.practiceType || '-'}</td>
+                                <td>${item.role || '-'}</td>
+                                <td>${item.duration || '-'}</td>
+                                <td>${formatDateTime(item.applyTime)}</td>
+                                <td><button class="btn-review" onclick='showReviewModal(${JSON.stringify(item)})'>审核</button></td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="8" class="empty-message">暂无待审核的申请</td></tr>';
+                    }
+                    renderPagination();
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" class="empty-message">加载失败</td></tr>';
+                }
+            } catch (err) {
+                console.error('加载待审核列表异常:', err);
+                document.getElementById('pendingTableBody').innerHTML = '<tr><td colspan="8" class="empty-message">加载失败，请刷新重试</td></tr>';
+            }
+        }
+
+        function formatDateTime(dt) {
+            if (!dt) return '-';
+            return dt.replace('T', ' ').substring(0, 16);
+        }
+
+        function renderPagination() {
+            const container = document.getElementById('pagination');
+            let html = '';
+            html += `<button ${currentPage <= 1 ? 'disabled' : ''} onclick="loadPendingList(${currentPage - 1})">上一页</button>`;
+            html += `<span style="padding: 8px 16px;">第 ${currentPage} / ${totalPages} 页</span>`;
+            html += `<button ${currentPage >= totalPages ? 'disabled' : ''} onclick="loadPendingList(${currentPage + 1})">下一页</button>`;
+            container.innerHTML = html;
+        }
+
+        function showReviewModal(record) {
+            currentRecord = record;
+            document.getElementById('recordId').value = record.recordId;
+            document.getElementById('reviewInfo').innerHTML = `
+                <p><strong>学生：</strong>${record.studentNo} - ${record.studentName}</p>
+                <p><strong>活动：</strong>${record.practiceName} (${record.practiceType || ''})</p>
+                <p><strong>角色：</strong>${record.role || '-'} | <strong>时长：</strong>${record.duration || '-'} 小时</p>
+                <p><strong>申请说明：</strong>${record.applyRemark || '无'}</p>
+            `;
+            document.getElementById('reviewModal').style.display = 'flex';
+        }
+
+        function hideReviewModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+            document.getElementById('reviewForm').reset();
+            currentRecord = null;
+        }
+
+        function initReviewForm() {
+            document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const status = document.getElementById('status').value;
+                if (!status) {
+                    showMessage('请选择审核结果', 'error');
+                    return;
+                }
+
+                const dto = {
+                    id: parseInt(document.getElementById('recordId').value),
+                    status: status,
+                    performanceScore: document.getElementById('performanceScore').value ? parseFloat(document.getElementById('performanceScore').value) : null,
+                    evaluation: document.getElementById('evaluation').value,
+                    reviewComment: document.getElementById('reviewComment').value
+                };
+
+                try {
+                    const res = await authFetch(`${API_BASE}/review/practice/review`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dto)
+                    });
+                    const data = await res.json();
+                    
+                    if (data.code === 1) {
+                        showMessage('审核完成', 'success');
+                        hideReviewModal();
+                        loadPendingList(currentPage);
+                    } else {
+                        showMessage(data.msg || '审核失败', 'error');
+                    }
+                } catch (err) {
+                    console.error('提交审核异常:', err);
+                    showMessage('网络异常，请稍后重试', 'error');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

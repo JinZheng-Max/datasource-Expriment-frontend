@@ -80,6 +80,7 @@
     font-size: 32px;
     font-weight: 700;
     background: linear-gradient(135deg, #f093fb, #f5576c);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 5px;
@@ -209,4 +210,27 @@
     font-weight: 500;
     background: rgba(102, 126, 234, 0.1);
     color: var(--primary-color);
+}
+
+/* 状态徽章 */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge.status-success {
+    background: rgba(67, 233, 123, 0.1);
+    color: #43e97b;
+}
+
+.status-badge.status-warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.status-badge.status-danger {
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
 }

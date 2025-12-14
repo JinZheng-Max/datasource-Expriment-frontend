@@ -131,6 +131,7 @@
                             <th>奖惩名称</th>
                             <th>颁发/处分日期</th>
                             <th>颁发/处分单位</th>
+                            <th>状态</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -214,6 +215,20 @@
                         <div class="form-group full-width">
                             <label>备注</label>
                             <textarea name="remark" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>审核状态 <span class="required">*</span></label>
+                            <select name="status" required>
+                                <option value="待审核">待审核</option>
+                                <option value="已通过">已通过</option>
+                                <option value="未通过">未通过</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>审核意见</label>
+                            <input type="text" name="reviewComment" placeholder="审核意见（可选）">
                         </div>
                     </div>
                     <input type="hidden" name="rpId">

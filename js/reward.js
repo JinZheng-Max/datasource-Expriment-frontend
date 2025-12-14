@@ -112,10 +112,12 @@ function renderRewards() {
     const tbody = document.getElementById('rewardTableBody');
 
     if (rewardData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px;">暂无数据</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px;">暂无数据</td></tr>';
     } else {
         tbody.innerHTML = rewardData.map(item => {
             const typeClass = item.type === '奖励' ? 'reward' : 'punishment';
+            const statusClass = item.status === '已通过' ? 'success' :
+                item.status === '待审核' ? 'warning' : 'danger';
             return `
             <tr>
                 <td>${item.studentNo || ''}</td>
@@ -126,6 +128,7 @@ function renderRewards() {
                 <td>${item.title || ''}</td>
                 <td>${item.awardDate || ''}</td>
                 <td>${item.issuingUnit || ''}</td>
+                <td><span class="status-badge status-${statusClass}">${item.status || ''}</span></td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-action btn-edit" onclick="editReward(${item.rpId})">编辑</button>
@@ -188,6 +191,11 @@ function showAddModal() {
     document.getElementById('rewardForm').reset();
     document.querySelector('input[name="rpId"]').value = '';
     document.getElementById('levelSelect').innerHTML = '<option value="">请先选择类型</option>';
+    const statusEl = document.querySelector('#rewardForm [name="status"]');
+    if (statusEl) {
+        statusEl.value = '待审核';
+    }
+    syncReviewFieldsByType();
     document.getElementById('rewardModal').classList.add('show');
 }
 
@@ -207,6 +215,34 @@ function onTypeChange() {
             const option = new Option(level, level);
             levelSelect.add(option);
         });
+    }
+
+    syncReviewFieldsByType();
+}
+
+function syncReviewFieldsByType() {
+    const form = document.getElementById('rewardForm');
+    if (!form) return;
+    const type = form.querySelector('[name="type"]')?.value;
+    const statusEl = form.querySelector('[name="status"]');
+    const reviewCommentEl = form.querySelector('[name="reviewComment"]');
+
+    if (type === '处分') {
+        if (statusEl) {
+            statusEl.value = '已通过';
+            statusEl.disabled = true;
+        }
+        if (reviewCommentEl) {
+            reviewCommentEl.value = '';
+            reviewCommentEl.disabled = true;
+        }
+    } else {
+        if (statusEl) {
+            statusEl.disabled = false;
+        }
+        if (reviewCommentEl) {
+            reviewCommentEl.disabled = false;
+        }
     }
 }
 
@@ -240,6 +276,16 @@ async function editReward(id) {
             form.querySelector('[name="cancelDate"]').value = item.cancelDate || '';
             form.querySelector('[name="reason"]').value = item.reason || '';
             form.querySelector('[name="remark"]').value = item.remark || '';
+            const statusEl = form.querySelector('[name="status"]');
+            if (statusEl) {
+                statusEl.value = item.status || '待审核';
+            }
+            const reviewCommentEl = form.querySelector('[name="reviewComment"]');
+            if (reviewCommentEl) {
+                reviewCommentEl.value = item.reviewComment || '';
+            }
+
+            syncReviewFieldsByType();
 
             document.getElementById('rewardModal').classList.add('show');
         } else {
@@ -287,6 +333,17 @@ async function handleSubmit(e) {
 
     // 数据类型转换
     data.studentId = parseInt(data.studentId);
+
+    // status 默认值兜底
+    if (!data.status) {
+        data.status = '待审核';
+    }
+
+    // 处分无需审核：前端兜底
+    if (data.type === '处分') {
+        data.status = '已通过';
+        delete data.reviewComment;
+    }
 
     // 删除空字段
     Object.keys(data).forEach(key => {

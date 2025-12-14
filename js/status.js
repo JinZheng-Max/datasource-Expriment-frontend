@@ -239,7 +239,7 @@ function changePage(page) {
 }
 
 function showAddModal() {
-    document.getElementById('modalTitle').textContent = '学籍变更';
+    document.getElementById('modalTitle').textContent = '添加学籍';
     document.getElementById('statusForm').reset();
     document.querySelector('input[name="status_id"]').value = '';
 

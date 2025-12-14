@@ -120,7 +120,7 @@ function initEditInfo() {
 function initPasswordChange() {
     const form = document.getElementById('passwordForm');
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const oldPassword = form.querySelector('[name="old_password"]').value;
@@ -143,53 +143,60 @@ function initPasswordChange() {
             return;
         }
 
-        // 这里应该调用API修改密码
-        console.log('修改密码:', {
-            oldPassword,
-            newPassword
-        });
+        try {
+            const res = await authFetch('http://localhost:8080/api/profile/password', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword, newPassword })
+            });
+            const data = await res.json();
 
-        showMessage('密码修改成功,请重新登录', 'success');
-
-        // 清空表单
-        form.reset();
-
-        // 3秒后跳转到登录页
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 3000);
+            if (data.code === 1) {
+                showMessage('密码修改成功,请重新登录', 'success');
+                form.reset();
+                setTimeout(() => {
+                    localStorage.removeItem('authentication');
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else {
+                showMessage(data.msg || '密码修改失败', 'error');
+            }
+        } catch (err) {
+            console.error('修改密码异常:', err);
+            showMessage('网络异常，请稍后重试', 'error');
+        }
     });
 }
 
 // 加载用户信息
-function loadUserInfo() {
-    // 这里应该从API获取用户信息
-    // 目前使用模拟数据
-    const userData = {
-        username: 'admin',
-        real_name: '系统管理员',
-        user_type: '管理员',
-        role: '系统管理员',
-        email: 'admin@example.com',
-        phone: '13800138000',
-        create_time: '2024-01-15',
-        last_login: '2024-12-20 09:30',
-        login_count: 238
-    };
+async function loadUserInfo() {
+    try {
+        const res = await authFetch('http://localhost:8080/api/profile/info');
+        const data = await res.json();
 
-    // 更新页面显示
-    document.getElementById('displayName').textContent = userData.real_name;
-    document.getElementById('displayRole').textContent = userData.role;
-    document.getElementById('createTime').textContent = userData.create_time;
-    document.getElementById('lastLogin').textContent = userData.last_login;
-    document.getElementById('loginCount').textContent = userData.login_count;
+        if (data.code === 1 && data.data) {
+            const userData = data.data;
 
-    // 填充表单
-    const form = document.getElementById('infoForm');
-    form.querySelector('[name="real_name"]').value = userData.real_name;
-    form.querySelector('[name="username"]').value = userData.username;
-    form.querySelector('[name="email"]').value = userData.email || '';
-    form.querySelector('[name="phone"]').value = userData.phone || '';
+            // 更新页面显示
+            document.getElementById('displayName').textContent = userData.realName || '用户';
+            document.getElementById('displayRole').textContent = userData.userType === 'admin' ? '系统管理员' : '学生';
 
-    console.log('用户信息加载完成:', userData);
+            // 填充表单
+            const form = document.getElementById('infoForm');
+            form.querySelector('[name="real_name"]').value = userData.realName || '';
+            form.querySelector('[name="username"]').value = userData.username || '';
+
+            console.log('用户信息加载完成:', userData);
+        }
+    } catch (err) {
+        console.error('加载用户信息异常:', err);
+        // 使用本地存储的用户信息作为备用
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+            const user = JSON.parse(currentUser);
+            document.getElementById('displayName').textContent = user.realName || user.username;
+            document.getElementById('displayRole').textContent = user.userType === 'admin' ? '系统管理员' : '学生';
+        }
+    }
 }

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人设置 - 学生信息管理系统</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/students.css">
+</head>
+
+<body>
+    <header class="top-header">
+        <div class="header-left">
+            <div class="logo">📚</div>
+            <h1>学生信息管理系统</h1>
+            <span class="user-badge">学生端</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2338ef7d'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='Arial'%3E学%3C/text%3E%3C/svg%3E"
+                        alt="用户头像">
+                    <span class="username" id="displayName">学生</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="location.href='index.html'"><span class="nav-icon">📊</span><span class="nav-text">我的概览</span></div>
+                <div class="nav-item" onclick="location.href='my-info.html'"><span class="nav-icon">👨‍🎓</span><span class="nav-text">我的信息</span></div>
+                <div class="nav-item" onclick="location.href='my-status.html'"><span class="nav-icon">📋</span><span class="nav-text">我的学籍</span></div>
+                <div class="nav-item" onclick="location.href='my-practice.html'"><span class="nav-icon">🏆</span><span class="nav-text">社会实践</span></div>
+                <div class="nav-item" onclick="location.href='my-reward.html'"><span class="nav-icon">🎖️</span><span class="nav-text">奖惩记录</span></div>
+                <div class="nav-item" onclick="location.href='my-scores.html'"><span class="nav-icon">📝</span><span class="nav-text">我的成绩</span></div>
+                <div class="nav-item" onclick="location.href='courses.html'"><span class="nav-icon">📚</span><span class="nav-text">课程查询</span></div>
+                <div class="nav-item active"><span class="nav-icon">👤</span><span class="nav-text">个人设置</span></div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span class="nav-text">退出登录</span></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>👤 个人设置</h2>
+                    <p class="subtitle">修改密码等个人设置</p>
+                </div>
+            </div>
+
+            <!-- 账号信息 -->
+            <div class="settings-card">
+                <h3>账号信息</h3>
+                <div class="info-row">
+                    <label>用户名</label>
+                    <span id="username">-</span>
+                </div>
+                <div class="info-row">
+                    <label>真实姓名</label>
+                    <span id="realName">-</span>
+                </div>
+                <div class="info-row">
+                    <label>用户类型</label>
+                    <span id="userType">学生</span>
+                </div>
+            </div>
+
+            <!-- 修改密码 -->
+            <div class="settings-card">
+                <h3>修改密码</h3>
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label for="oldPassword">原密码</label>
+                        <input type="password" id="oldPassword" placeholder="请输入原密码" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">新密码</label>
+                        <input type="password" id="newPassword" placeholder="请输入新密码（至少6位）" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">确认新密码</label>
+                        <input type="password" id="confirmPassword" placeholder="请再次输入新密码" required>
+                    </div>
+                    <button type="submit" class="btn-primary">修改密码</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        .user-badge { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; margin-left: 10px; }
+        .settings-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); margin-bottom: 20px; }
+        .settings-card h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 20px; padding-left: 12px; border-left: 3px solid var(--primary-color); }
+        .info-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+        .info-row:last-child { border-bottom: none; }
+        .info-row label { width: 120px; color: var(--text-secondary); font-size: 14px; }
+        .info-row span { color: var(--text-primary); font-size: 14px; font-weight: 500; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px; }
+        .form-group input { width: 100%; max-width: 400px; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; transition: border-color 0.3s; }
+        .form-group input:focus { outline: none; border-color: var(--primary-color); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+    </style>
+
+    <script src="../js/common.js"></script>
+    <script src="js/student-common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!initStudentPage()) return;
+            loadProfileInfo();
+            initPasswordForm();
+        });
+
+        async function loadProfileInfo() {
+            try {
+                const res = await studentFetch(`${API_BASE}/profile/info`);
+                const data = await res.json();
+                
+                if (data.code === 1 && data.data) {
+                    const info = data.data;
+                    document.getElementById('username').textContent = info.username || '-';
+                    document.getElementById('realName').textContent = info.realName || '-';
+                    document.getElementById('userType').textContent = info.userType === 'student' ? '学生' : '管理员';
+                }
+            } catch (err) {
+                console.error('加载账号信息异常:', err);
+            }
+        }
+
+        function initPasswordForm() {
+            const form = document.getElementById('passwordForm');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const oldPassword = document.getElementById('oldPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (newPassword !== confirmPassword) {
+                    showMessage('两次输入的新密码不一致', 'error');
+                    return;
+                }
+                
+                if (newPassword.length < 6) {
+                    showMessage('新密码长度不能少于6位', 'error');
+                    return;
+                }
+                
+                try {
+                    const res = await studentFetch(`${API_BASE}/profile/password`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ oldPassword, newPassword })
+                    });
+                    const data = await res.json();
+                    
+                    if (data.code === 1) {
+                        showMessage('密码修改成功，请重新登录', 'success');
+                        setTimeout(() => {
+                            localStorage.removeItem('authentication');
+                            localStorage.removeItem('currentUser');
+                            window.location.href = '../html/login.html';
+                        }, 2000);
+                    } else {
+                        showMessage(data.msg || '密码修改失败', 'error');
+                    }
+                } catch (err) {
+                    console.error('修改密码异常:', err);
+                    showMessage('网络异常，请稍后重试', 'error');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -73,12 +73,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     userId: vo.userId,
                     username: vo.username,
                     realName: vo.realName,
-                    userType: vo.userType
+                    userType: vo.userType,
+                    studentId: vo.studentId
                 }));
 
                 showMessage('登录成功！', 'success');
                 setTimeout(() => {
-                    window.location.href = './index.html';
+                    // 根据用户类型跳转到不同页面
+                    if (vo.userType === 'student') {
+                        window.location.href = '../student/index.html';
+                    } else {
+                        window.location.href = './index.html';
+                    }
                 }, 800);
             } else {
                 const msg = (data && data.msg) ? data.msg : '用户名或密码错误';

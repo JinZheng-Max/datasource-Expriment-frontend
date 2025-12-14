@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的成绩 - 学生信息管理系统</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/students.css">
+</head>
+
+<body>
+    <header class="top-header">
+        <div class="header-left">
+            <div class="logo">📚</div>
+            <h1>学生信息管理系统</h1>
+            <span class="user-badge">学生端</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2338ef7d'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='Arial'%3E学%3C/text%3E%3C/svg%3E"
+                        alt="用户头像">
+                    <span class="username" id="displayName">学生</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="location.href='index.html'"><span class="nav-icon">📊</span><span class="nav-text">我的概览</span></div>
+                <div class="nav-item" onclick="location.href='my-info.html'"><span class="nav-icon">👨‍🎓</span><span class="nav-text">我的信息</span></div>
+                <div class="nav-item" onclick="location.href='my-status.html'"><span class="nav-icon">📋</span><span class="nav-text">我的学籍</span></div>
+                <div class="nav-item" onclick="location.href='my-practice.html'"><span class="nav-icon">🏆</span><span class="nav-text">社会实践</span></div>
+                <div class="nav-item" onclick="location.href='my-reward.html'"><span class="nav-icon">🎖️</span><span class="nav-text">奖惩记录</span></div>
+                <div class="nav-item active"><span class="nav-icon">📝</span><span class="nav-text">我的成绩</span></div>
+                <div class="nav-item" onclick="location.href='courses.html'"><span class="nav-icon">📚</span><span class="nav-text">课程查询</span></div>
+                <div class="nav-item" onclick="location.href='profile.html'"><span class="nav-icon">👤</span><span class="nav-text">个人设置</span></div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span class="nav-text">退出登录</span></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>📝 我的成绩</h2>
+                    <p class="subtitle">查看各学期课程成绩</p>
+                </div>
+            </div>
+
+            <!-- 成绩统计 -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-label">总课程数</span>
+                    <span class="stat-value" id="totalCourses">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">已通过</span>
+                    <span class="stat-value passed" id="passedCourses">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">平均绩点</span>
+                    <span class="stat-value" id="avgGpa">-</span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>学期</th>
+                            <th>课程代码</th>
+                            <th>课程名称</th>
+                            <th>学分</th>
+                            <th>平时成绩</th>
+                            <th>期中成绩</th>
+                            <th>期末成绩</th>
+                            <th>总评成绩</th>
+                            <th>绩点</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreTableBody">
+                        <tr><td colspan="10" class="empty-message">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        .user-badge { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; margin-left: 10px; }
+        .stats-row { display: flex; gap: 20px; margin-bottom: 20px; }
+        .stat-item { background: white; border-radius: 12px; padding: 20px 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; }
+        .stat-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+        .stat-value.passed { color: #2e7d32; }
+        .table-container { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .data-table th { background: var(--bg-secondary); font-weight: 600; color: var(--text-secondary); font-size: 13px; }
+        .data-table td { font-size: 14px; color: var(--text-primary); }
+        .data-table tbody tr:hover { background: var(--bg-secondary); }
+        .empty-message { text-align: center; color: var(--text-secondary); padding: 40px !important; }
+        .score-pass { color: #2e7d32; font-weight: 600; }
+        .score-fail { color: #c62828; font-weight: 600; }
+        .status-tag { padding: 4px 10px; border-radius: 10px; font-size: 12px; }
+        .status-tag.pass { background: #e8f5e9; color: #2e7d32; }
+        .status-tag.fail { background: #ffebee; color: #c62828; }
+    </style>
+
+    <script src="../js/common.js"></script>
+    <script src="js/student-common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!initStudentPage()) return;
+            loadMyScores();
+        });
+
+        async function loadMyScores() {
+            try {
+                const res = await studentFetch(`${API_BASE}/student-portal/my-scores`);
+                const data = await res.json();
+                
+                const tbody = document.getElementById('scoreTableBody');
+                
+                if (data.code === 1 && data.data && data.data.length > 0) {
+                    const scores = data.data;
+                    
+                    // 统计
+                    document.getElementById('totalCourses').textContent = scores.length;
+                    const passed = scores.filter(s => s.isPass).length;
+                    document.getElementById('passedCourses').textContent = passed;
+                    
+                    const validGpa = scores.filter(s => s.gradePoint != null);
+                    if (validGpa.length > 0) {
+                        const avgGpa = validGpa.reduce((sum, s) => sum + s.gradePoint, 0) / validGpa.length;
+                        document.getElementById('avgGpa').textContent = avgGpa.toFixed(2);
+                    }
+                    
+                    tbody.innerHTML = scores.map(item => `
+                        <tr>
+                            <td>${item.semesterName || '-'}</td>
+                            <td>${item.courseCode || '-'}</td>
+                            <td>${item.courseName || '-'}</td>
+                            <td>${item.credits || '-'}</td>
+                            <td>${item.regularScore != null ? item.regularScore : '-'}</td>
+                            <td>${item.midtermScore != null ? item.midtermScore : '-'}</td>
+                            <td>${item.finalScore != null ? item.finalScore : '-'}</td>
+                            <td class="${item.isPass ? 'score-pass' : 'score-fail'}">${item.totalScore != null ? item.totalScore : '-'}</td>
+                            <td>${item.gradePoint != null ? item.gradePoint : '-'}</td>
+                            <td><span class="status-tag ${item.isPass ? 'pass' : 'fail'}">${item.isPass ? '通过' : '未通过'}</span></td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="10" class="empty-message">暂无成绩记录</td></tr>';
+                }
+            } catch (err) {
+                console.error('加载成绩异常:', err);
+                document.getElementById('scoreTableBody').innerHTML = '<tr><td colspan="10" class="empty-message">加载失败，请刷新重试</td></tr>';
+            }
+        }
+    </script>
+</body>
+</html>

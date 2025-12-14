@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的学籍 - 学生信息管理系统</title>
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/students.css">
+</head>
+
+<body>
+    <header class="top-header">
+        <div class="header-left">
+            <div class="logo">📚</div>
+            <h1>学生信息管理系统</h1>
+            <span class="user-badge">学生端</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2338ef7d'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='Arial'%3E学%3C/text%3E%3C/svg%3E"
+                        alt="用户头像">
+                    <span class="username" id="displayName">学生</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="location.href='index.html'"><span class="nav-icon">📊</span><span class="nav-text">我的概览</span></div>
+                <div class="nav-item" onclick="location.href='my-info.html'"><span class="nav-icon">👨‍🎓</span><span class="nav-text">我的信息</span></div>
+                <div class="nav-item active"><span class="nav-icon">📋</span><span class="nav-text">我的学籍</span></div>
+                <div class="nav-item" onclick="location.href='my-practice.html'"><span class="nav-icon">🏆</span><span class="nav-text">社会实践</span></div>
+                <div class="nav-item" onclick="location.href='my-reward.html'"><span class="nav-icon">🎖️</span><span class="nav-text">奖惩记录</span></div>
+                <div class="nav-item" onclick="location.href='my-scores.html'"><span class="nav-icon">📝</span><span class="nav-text">我的成绩</span></div>
+                <div class="nav-item" onclick="location.href='courses.html'"><span class="nav-icon">📚</span><span class="nav-text">课程查询</span></div>
+                <div class="nav-item" onclick="location.href='profile.html'"><span class="nav-icon">👤</span><span class="nav-text">个人设置</span></div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span class="nav-text">退出登录</span></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>📋 我的学籍</h2>
+                    <p class="subtitle">查看学籍状态信息</p>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="status-header">
+                    <div class="status-badge" id="statusBadge">在读</div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>学籍状态</label>
+                        <span id="status">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>状态变更日期</label>
+                        <span id="statusDate">-</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <label>变更原因</label>
+                        <span id="reason">-</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <label>备注</label>
+                        <span id="remark">-</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        .user-badge { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; margin-left: 10px; }
+        .info-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); }
+        .status-header { text-align: center; margin-bottom: 30px; }
+        .status-badge { display: inline-block; padding: 12px 40px; border-radius: 30px; font-size: 20px; font-weight: 600; color: white; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .status-badge.warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .info-item { display: flex; flex-direction: column; gap: 6px; }
+        .info-item.full-width { grid-column: span 2; }
+        .info-item label { font-size: 13px; color: var(--text-secondary); }
+        .info-item span { font-size: 15px; color: var(--text-primary); font-weight: 500; }
+    </style>
+
+    <script src="../js/common.js"></script>
+    <script src="js/student-common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!initStudentPage()) return;
+            loadMyStatus();
+        });
+
+        async function loadMyStatus() {
+            try {
+                const res = await studentFetch(`${API_BASE}/student-portal/my-status`);
+                const data = await res.json();
+                
+                if (data.code === 1 && data.data) {
+                    const info = data.data;
+                    document.getElementById('status').textContent = info.status || '-';
+                    document.getElementById('statusDate').textContent = info.statusDate || '-';
+                    document.getElementById('reason').textContent = info.reason || '-';
+                    document.getElementById('remark').textContent = info.remark || '-';
+                    
+                    const badge = document.getElementById('statusBadge');
+                    badge.textContent = info.status || '在读';
+                    if (info.status && info.status !== '在读') {
+                        badge.classList.add('warning');
+                    }
+                } else {
+                    showMessage(data.msg || '加载学籍信息失败', 'error');
+                }
+            } catch (err) {
+                console.error('加载学籍信息异常:', err);
+            }
+        }
+    </script>
+</body>
+</html>
