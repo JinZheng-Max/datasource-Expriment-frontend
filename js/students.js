@@ -396,7 +396,7 @@ async function viewStudent(id) {
                 field.value = finalValue;
             };
 
-            setFieldValue('studentId', student.studentId);
+            setFieldValue('studentId', id);
             setFieldValue('studentNo', student.studentNo);
             setFieldValue('name', student.name);
             setFieldValue('gender', student.gender);
@@ -426,7 +426,7 @@ async function viewStudent(id) {
             }
 
             // 禁用所有表单输入（只读模式）
-            const inputs = form.querySelectorAll('input, select');
+            const inputs = form.querySelectorAll('input:not([type="hidden"]), select');
             inputs.forEach(input => {
                 input.disabled = true;
             });
@@ -467,13 +467,15 @@ async function editStudent(id) {
             const isEditField = document.getElementById('isEditField');
             if (isEditField) {
                 isEditField.value = 'true';
+                isEditField.disabled = false;
             }
 
             // 【关键3】设置 studentId（最重要！）
             const studentIdField = document.getElementById('studentIdField');
             if (studentIdField) {
-                studentIdField.value = student.studentId;
-                console.log('✅ 已设置 studentId:', student.studentId);
+                studentIdField.value = id;
+                studentIdField.disabled = false;
+                console.log('✅ 已设置 studentId:', id);
             } else {
                 console.error('❌ studentIdField 元素不存在！');
                 showMessage('表单初始化失败', 'error');
