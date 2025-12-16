@@ -8,7 +8,7 @@ let pageSize = 10;
 let totalPages = 1;
 let totalRecords = 0;
 let courseData = [];
-let allMajors = [];
+let allMajors = []; // 存储所有专业信息 {majorId, majorName}
 
 function initCoursePage() {
     console.log('initCoursePage 开始执行');
@@ -69,20 +69,26 @@ function initCoursePage() {
 
 async function loadMajors() {
     try {
-        const res = await authFetch('http://localhost:8080/api/student/major', {
+        // 直接调用course模块的专业接口,返回包含ID和名称的数据
+        const res = await authFetch('http://localhost:8080/api/course/majors', {
             method: 'GET'
         });
         const json = await res.json();
 
+        console.log('专业接口返回:', json);
+
         if (json.code === 1 && json.data) {
+            // json.data 是对象数组: [{majorId: 1, majorName: "计算机科学与技术"}, ...]
             allMajors = json.data;
+
+            console.log('加载到的专业列表:', allMajors);
 
             // 填充筛选下拉框
             const majorFilter = document.getElementById('majorFilter');
             if (majorFilter) {
                 majorFilter.innerHTML = '<option value="">全部专业</option>';
                 allMajors.forEach(major => {
-                    const option = new Option(major, major);
+                    const option = new Option(major.majorName, major.majorId);
                     majorFilter.add(option);
                 });
             }
@@ -92,13 +98,18 @@ async function loadMajors() {
             if (modalMajorSelect) {
                 modalMajorSelect.innerHTML = '<option value="">公共课（所有专业）</option>';
                 allMajors.forEach(major => {
-                    const option = new Option(major, major);
+                    const option = new Option(major.majorName, major.majorId);
                     modalMajorSelect.add(option);
                 });
+                console.log('模态框专业下拉框已填充,共', allMajors.length, '个选项');
             }
+        } else {
+            console.error('获取专业列表失败:', json);
+            showMessage('获取专业列表失败', 'error');
         }
     } catch (err) {
         console.error('加载专业异常:', err);
+        showMessage('加载专业异常', 'error');
     }
 }
 
@@ -232,13 +243,13 @@ function showAddModal() {
 
 async function editCourse(id) {
     try {
-        const res = await authFetch(`http://localhost:8080/api/course/${id}`, {
-            method: 'GET'
-        });
+        const res = await authFetch(`http://localhost:8080/api/course/${id}`);
         const json = await res.json();
 
         if (json.code === 1 && json.data) {
             const item = json.data;
+            console.log('编辑课程数据:', item);
+
             document.getElementById('modalTitle').textContent = '编辑课程';
             const form = document.getElementById('courseForm');
 
@@ -248,8 +259,14 @@ async function editCourse(id) {
             form.querySelector('[name="courseType"]').value = item.courseType;
             form.querySelector('[name="credits"]').value = item.credits;
             form.querySelector('[name="hours"]').value = item.hours || '';
+
+            // 修复：设置majorId的值
+            const majorSelect = form.querySelector('[name="majorId"]');
+            majorSelect.value = item.majorId || '';
+
+            console.log('设置专业ID:', item.majorId);
+
             form.querySelector('[name="semesterOrder"]').value = item.semesterOrder || '';
-            form.querySelector('[name="majorId"]').value = item.majorId || '';
             form.querySelector('[name="description"]').value = item.description || '';
 
             document.getElementById('courseModal').classList.add('show');
@@ -303,15 +320,25 @@ async function handleSubmit(e) {
     // 数据类型转换
     if (data.credits) data.credits = parseFloat(data.credits);
     if (data.hours) data.hours = parseInt(data.hours);
-    if (data.semesterOrder) data.semesterOrder = parseInt(data.semesterOrder);
-    if (data.majorId) data.majorId = parseInt(data.majorId);
 
-    // 删除空字段
+    // 修复：确保majorId被正确处理
+    if (data.majorId && data.majorId !== '') {
+        data.majorId = parseInt(data.majorId);
+    } else {
+        // 如果选择了"公共课（所有专业）",则不发送majorId字段
+        delete data.majorId;
+    }
+
+    if (data.semesterOrder) data.semesterOrder = parseInt(data.semesterOrder);
+
+    // 删除空字段，但保留majorId=0的情况
     Object.keys(data).forEach(key => {
         if (data[key] === '' && key !== 'courseId') {
             delete data[key];
         }
     });
+
+    console.log('提交的课程数据:', data); // 调试日志
 
     if (isEdit) {
         data.courseId = parseInt(data.courseId);

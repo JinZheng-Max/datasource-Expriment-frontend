@@ -150,8 +150,8 @@
                         <option value="100">100条</option>
                     </select>
                 </div>
-            <div class="pagination" id="pagination">
-                <!-- 分页按钮将通过JavaScript动态生成 -->
+                <div class="pagination" id="pagination">
+                    <!-- 分页按钮将通过JavaScript动态生成 -->
                 </div>
             </div>
         </main>
@@ -166,6 +166,8 @@
             </div>
             <div class="modal-body">
                 <form id="studentForm">
+                    <input type="hidden" name="studentId" id="studentIdField">
+                    <input type="hidden" name="isEdit" id="isEditField" value="false">
                     <div class="form-row">
                         <div class="form-group">
                             <label>学号 <span class="required">*</span></label>

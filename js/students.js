@@ -16,10 +16,10 @@ function initStudentPage() {
 
     // 检查必需元素是否存在（防止在错误页面加载此脚本）
     const requiredElements = [
-        'addStudentBtn', 'searchInput', 'gradeFilter', 'majorFilter', 
+        'addStudentBtn', 'searchInput', 'gradeFilter', 'majorFilter',
         'genderFilter', 'resetFilterBtn', 'studentForm', 'studentModal'
     ];
-    
+
     for (const id of requiredElements) {
         if (!document.getElementById(id)) {
             console.warn(`students.js: 元素 #${id} 不存在，可能不在学生管理页面`);
@@ -35,11 +35,11 @@ function initStudentPage() {
     document.getElementById('genderFilter').addEventListener('change', filterStudents);
     document.getElementById('resetFilterBtn').addEventListener('click', resetFilters);
     document.getElementById('studentForm').addEventListener('submit', handleSubmit);
-    
+
     // 每页显示条数选择器
     const pageSizeSelect = document.getElementById('pageSizeSelect');
     if (pageSizeSelect) {
-        pageSizeSelect.addEventListener('change', function() {
+        pageSizeSelect.addEventListener('change', function () {
             pageSize = parseInt(this.value);
             currentPage = 1; // 重置到第一页
             loadStudents();
@@ -82,21 +82,21 @@ async function loadMajors() {
             method: 'GET'
         });
         const json = await res.json();
-        
+
         if (json.code === 1 && json.data) {
             const majors = json.data; // 返回的是 List<String>
             const majorSelect = document.getElementById('majorSelect');
             const majorFilter = document.getElementById('majorFilter');
-            
+
             majors.forEach(majorName => {
                 const option1 = new Option(majorName, majorName);
                 const option2 = new Option(majorName, majorName);
                 majorSelect.add(option1);
                 majorFilter.add(option2);
             });
-            
+
             // 监听专业选择变化，动态加载班级
-            majorSelect.addEventListener('change', function() {
+            majorSelect.addEventListener('change', function () {
                 const selectedMajor = this.value;
                 if (selectedMajor) {
                     loadClassesByMajor(selectedMajor);
@@ -127,12 +127,12 @@ async function loadClassesByMajor(majorName) {
             }
         });
         const json = await res.json();
-        
+
         if (json.code === 1 && json.data) {
             const classes = json.data; // 返回的是 List<String>
             const classSelect = document.getElementById('classSelect');
             classSelect.innerHTML = '<option value="">请选择</option>';
-            
+
             classes.forEach(className => {
                 const option = new Option(className, className);
                 classSelect.add(option);
@@ -174,7 +174,7 @@ async function loadStudents() {
         if (genderValue) {
             payload.gender = genderValue;
         }
- 
+
         const res = await authFetch('http://localhost:8080/api/student/page', {
             method: 'POST',
             headers: {
@@ -183,7 +183,7 @@ async function loadStudents() {
             body: JSON.stringify(payload)
         });
         const json = await res.json();
-        
+
         if (json.code === 1 && json.data) {
             const pageResult = json.data;
             studentsData = pageResult.records || [];
@@ -296,7 +296,7 @@ function resetFilters() {
 function renderPagination() {
     const pagination = document.getElementById('pagination');
     let html = '';
-    
+
     // 显示分页信息
     const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
     const endRecord = Math.min(currentPage * pageSize, totalRecords);
@@ -331,38 +331,38 @@ function changePage(page) {
 function showAddModal() {
     document.getElementById('modalTitle').textContent = '添加学生';
     document.getElementById('studentForm').reset();
-    
+
     // 设置为新增模式
-    const isEditField = document.querySelector('input[name="isEdit"]');
+    const isEditField = document.getElementById('isEditField');
     if (isEditField) {
         isEditField.value = 'false';
     }
-    
+
     // 清空 studentId（新增时不需要）
-    const studentIdField = document.querySelector('input[name="studentId"]');
+    const studentIdField = document.getElementById('studentIdField');
     if (studentIdField) {
         studentIdField.value = '';
     }
-    
+
     // 启用所有表单输入
     const form = document.getElementById('studentForm');
     const inputs = form.querySelectorAll('input, select');
     inputs.forEach(input => {
         input.disabled = false;
     });
-    
+
     // 显示保存按钮
     const saveBtn = document.querySelector('.modal-footer .btn-primary');
     if (saveBtn) {
         saveBtn.style.display = 'inline-block';
     }
-    
+
     // 清空班级选择（因为还没选专业）
     const classSelect = document.getElementById('classSelect');
     if (classSelect) {
         classSelect.innerHTML = '<option value="">请选择</option>';
     }
-    
+
     document.getElementById('studentModal').classList.add('show');
 }
 
@@ -373,12 +373,12 @@ async function viewStudent(id) {
             method: 'GET'
         });
         const json = await res.json();
-        
+
         if (json.code === 1 && json.data) {
             const student = json.data;
             document.getElementById('modalTitle').textContent = '查看学生信息';
             const form = document.getElementById('studentForm');
-            
+
             // 填充表单数据（使用安全的方式，避免null错误）
             const setFieldValue = (name, value) => {
                 const field = form.querySelector(`[name="${name}"]`);
@@ -395,7 +395,7 @@ async function viewStudent(id) {
 
                 field.value = finalValue;
             };
-            
+
             setFieldValue('studentId', student.studentId);
             setFieldValue('studentNo', student.studentNo);
             setFieldValue('name', student.name);
@@ -424,13 +424,13 @@ async function viewStudent(id) {
                     classSelect.innerHTML = '<option value="">请选择</option>';
                 }
             }
-            
+
             // 禁用所有表单输入（只读模式）
             const inputs = form.querySelectorAll('input, select');
             inputs.forEach(input => {
                 input.disabled = true;
             });
-            
+
             // 隐藏保存按钮，只显示关闭按钮
             const saveBtn = document.querySelector('.modal-footer .btn-primary');
             if (saveBtn) {
@@ -454,53 +454,59 @@ async function editStudent(id) {
             method: 'GET'
         });
         const json = await res.json();
-        
+
         if (json.code === 1 && json.data) {
             const student = json.data;
             document.getElementById('modalTitle').textContent = '编辑学生';
             const form = document.getElementById('studentForm');
-            
-            // 设置为编辑模式
-            const isEditField = form.querySelector('[name="isEdit"]');
+
+            // 【关键1】先重置表单
+            form.reset();
+
+            // 【关键2】设置为编辑模式
+            const isEditField = document.getElementById('isEditField');
             if (isEditField) {
                 isEditField.value = 'true';
             }
-            
-            // 设置 studentId 隐藏字段
-            const studentIdField = form.querySelector('[name="studentId"]');
+
+            // 【关键3】设置 studentId（最重要！）
+            const studentIdField = document.getElementById('studentIdField');
             if (studentIdField) {
-                studentIdField.value = student.studentId || '';
+                studentIdField.value = student.studentId;
+                console.log('✅ 已设置 studentId:', student.studentId);
+            } else {
+                console.error('❌ studentIdField 元素不存在！');
+                showMessage('表单初始化失败', 'error');
+                return;
             }
-            
-            // 启用所有表单输入（编辑模式）
-            const inputs = form.querySelectorAll('input, select');
+
+            // 启用所有表单输入
+            const inputs = form.querySelectorAll('input:not([type="hidden"]), select');
             inputs.forEach(input => {
                 input.disabled = false;
             });
-            
+
             // 显示保存按钮
             const saveBtn = document.querySelector('.modal-footer .btn-primary');
             if (saveBtn) {
                 saveBtn.style.display = 'inline-block';
             }
-            
+
+            // 填充其他表单数据
             const setFieldValue = (name, value) => {
                 const field = form.querySelector(`[name="${name}"]`);
-                if (!field) {
-                    return;
-                }
- 
+                if (!field) return;
+
                 let finalValue = value ?? '';
                 if (name === 'birthDate' || name === 'admissionDate') {
                     finalValue = formatDateValue(value);
                 } else if (name === 'grade') {
                     finalValue = value != null ? String(value) : '';
                 }
- 
+
                 field.value = finalValue;
             };
-            
-            // 填充表单数据（字段名与后端DTO一致）
+
             setFieldValue('studentNo', student.studentNo);
             setFieldValue('name', student.name);
             setFieldValue('gender', student.gender);
@@ -513,7 +519,8 @@ async function editStudent(id) {
             setFieldValue('homeAddress', student.homeAddress);
             setFieldValue('emergencyContact', student.emergencyContact);
             setFieldValue('emergencyPhone', student.emergencyPhone);
- 
+
+            // 设置专业与班级
             const majorSelect = form.querySelector('[name="major"]');
             const classSelect = form.querySelector('[name="className"]');
             if (majorSelect) {
@@ -523,11 +530,12 @@ async function editStudent(id) {
                     if (classSelect) {
                         classSelect.value = student.className || '';
                     }
-                } else if (classSelect) {
-                    classSelect.innerHTML = '<option value="">请选择</option>';
                 }
             }
- 
+
+            // 【关键4】再次确认 studentId 已设置
+            console.log('🔍 最终检查 studentIdField.value:', document.getElementById('studentIdField').value);
+
             document.getElementById('studentModal').classList.add('show');
         } else {
             showMessage(json.msg || '获取学生信息失败', 'error');
@@ -543,13 +551,13 @@ async function deleteStudent(id) {
     if (!confirm(`确定要删除该学生吗？`)) {
         return;
     }
-    
+
     try {
         const res = await authFetch(`http://localhost:8080/api/student/delete/${id}`, {
             method: 'DELETE'
         });
         const json = await res.json();
-        
+
         if (json.code === 1) {
             showMessage('删除成功', 'success');
             loadStudents(); // 重新加载学生列表
@@ -570,12 +578,33 @@ function closeModal() {
 // 处理表单提交
 async function handleSubmit(e) {
     e.preventDefault();
-    const formData = new FormData(e.target);
+
+    const form = e.target;
+    const formData = new FormData(form);
     const data = Object.fromEntries(formData);
-    
-    // 判断是编辑还是新增：通过隐藏字段 isEdit 来判断
+
+    // 【关键】先打印原始数据
+    console.log('📋 表单原始数据:', JSON.stringify(data, null, 2));
+
+    // 判断是编辑还是新增
     const isEdit = data.isEdit === 'true';
-    delete data.isEdit; // 删除标记字段
+    delete data.isEdit;
+
+    // 【关键】处理 studentId
+    if (isEdit) {
+        // 编辑模式：必须有 studentId
+        if (!data.studentId || data.studentId === '') {
+            console.error('❌ 编辑模式但 studentId 为空！');
+            showMessage('学生ID不能为空，请刷新页面重试', 'error');
+            return;
+        }
+        data.studentId = parseInt(data.studentId, 10);
+        console.log('✅ 编辑模式，studentId:', data.studentId);
+    } else {
+        // 新增模式：删除 studentId
+        delete data.studentId;
+        console.log('✅ 新增模式，已删除 studentId');
+    }
 
     // 移除空字符串字段（但保留 studentId）
     Object.keys(data).forEach(key => {
@@ -583,12 +612,10 @@ async function handleSubmit(e) {
             delete data[key];
         }
     });
-    
-    // 确保 studentId 是数字类型（编辑时）
-    if (isEdit && data.studentId) {
-        data.studentId = parseInt(data.studentId);
-    }
-    
+
+    console.log('📤 即将提交的数据:', JSON.stringify(data, null, 2));
+
+    // 根据模式选择接口
     if (isEdit) {
         // 更新学生
         try {
@@ -600,22 +627,21 @@ async function handleSubmit(e) {
                 body: JSON.stringify(data)
             });
             const json = await res.json();
-            
+
+            console.log('📥 服务器响应:', json);
+
             if (json.code === 1) {
                 showMessage('更新成功', 'success');
                 closeModal();
-                loadStudents(); // 重新加载学生列表
+                loadStudents();
             } else {
                 showMessage(json.msg || '更新失败', 'error');
             }
         } catch (err) {
-            console.error('更新学生异常:', err);
+            console.error('❌ 更新学生异常:', err);
             showMessage('网络异常，请稍后重试', 'error');
         }
     } else {
-        // 添加学生时删除 studentId 字段
-        delete data.studentId;
-        
         // 添加学生
         try {
             const res = await authFetch('http://localhost:8080/api/student/add', {
@@ -626,16 +652,18 @@ async function handleSubmit(e) {
                 body: JSON.stringify(data)
             });
             const json = await res.json();
-            
+
+            console.log('📥 服务器响应:', json);
+
             if (json.code === 1) {
                 showMessage('添加成功', 'success');
                 closeModal();
-                loadStudents(); // 重新加载学生列表
+                loadStudents();
             } else {
                 showMessage(json.msg || '添加失败', 'error');
             }
         } catch (err) {
-            console.error('添加学生异常:', err);
+            console.error('❌ 添加学生异常:', err);
             showMessage('网络异常，请稍后重试', 'error');
         }
     }

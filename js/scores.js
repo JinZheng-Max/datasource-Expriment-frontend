@@ -297,6 +297,7 @@ async function handleScoreSubmit(e) {
 
     const isEdit = !!data.scoreId;
 
+    // 数据类型转换
     data.studentId = parseInt(data.studentId);
     data.courseId = parseInt(data.courseId);
     data.semesterId = parseInt(data.semesterId);
@@ -307,11 +308,19 @@ async function handleScoreSubmit(e) {
     if (data.gradePoint) data.gradePoint = parseFloat(data.gradePoint);
     data.isPass = data.isPass === 'true';
 
+    // status字段必须保留,不能删除
+    if (!data.status) {
+        data.status = '正常'; // 默认值
+    }
+
+    // 删除其他空字段
     Object.keys(data).forEach(key => {
-        if (data[key] === '' && key !== 'scoreId' && key !== 'totalScore') {
+        if (data[key] === '' && key !== 'scoreId' && key !== 'totalScore' && key !== 'status') {
             delete data[key];
         }
     });
+
+    console.log('提交的数据:', data); // 添加调试日志
 
     if (isEdit) {
         data.scoreId = parseInt(data.scoreId);

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <!-- ...existing code... -->
+</head>
+
+<body>
+    <!-- ...existing code... -->
+
+    <!-- 学生信息模态框 -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加学生</h2>
+                <span class="modal-close">&times;</span>
+            </div>
+            <form id="studentForm">
+                <!-- 【关键】隐藏字段必须在表单最前面 -->
+                <input type="hidden" name="studentId" id="studentIdField">
+                <input type="hidden" name="isEdit" id="isEditField" value="false">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="studentNo">学号 <span style="color: red;">*</span></label>
+                        <input type="text" id="studentNo" name="studentNo" required>
+                    </div>
+                    <!-- ...existing code... -->
+                </div>
+                <!-- ...existing code... -->
+            </form>
+        </div>
+    </div>
+
+    <!-- ...existing code... -->
+</body>
+
+</html>
